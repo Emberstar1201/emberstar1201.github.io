@@ -1,6 +1,6 @@
 <template>
   <div class="log">
-    <div v-for="(entry, index) in content.entries" :key="index" class="log-entry">
+    <div v-for="(entry, index) in content.items" :key="index" class="log-entry">
       <span class="log-label">{{ entry.label }}</span>
       <span class="log-value">
         <HighlightedText :text="entry.value" :highlights="entry.highlights" />

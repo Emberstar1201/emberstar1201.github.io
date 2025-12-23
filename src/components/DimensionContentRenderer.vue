@@ -34,21 +34,9 @@
           :content="content" 
         />
         
-        <!-- 渲染灵魂流 -->
-        <SoulFlowRenderer 
-          v-else-if="content.type === 'soulFlow'" 
-          :content="content" 
-        />
-        
-        <!-- 渲染现象描述 -->
-        <PhenomenonRenderer 
-          v-else-if="content.type === 'phenomenon'" 
-          :content="content" 
-        />
-        
-        <!-- 渲染梦境记录 -->
-        <DreamRecordRenderer 
-          v-else-if="content.type === 'dreamRecord'" 
+        <!-- 渲染结构化内容 -->
+        <StructuredContentRenderer 
+          v-else-if="content.type === 'structuredContent'" 
           :content="content" 
         />
         
@@ -80,9 +68,7 @@ import ListRenderer from './renderers/ListRenderer.vue';
 import NumberedListRenderer from './renderers/NumberedListRenderer.vue';
 import NestedListRenderer from './renderers/NestedListRenderer.vue';
 import SubsectionRenderer from './renderers/SubsectionRenderer.vue';
-import SoulFlowRenderer from './renderers/SoulFlowRenderer.vue';
-import PhenomenonRenderer from './renderers/PhenomenonRenderer.vue';
-import DreamRecordRenderer from './renderers/DreamRecordRenderer.vue';
+import StructuredContentRenderer from './renderers/StructuredContentRenderer.vue';
 import LogRenderer from './renderers/LogRenderer.vue';
 import QuoteRenderer from './renderers/QuoteRenderer.vue';
 

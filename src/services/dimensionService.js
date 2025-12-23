@@ -152,7 +152,7 @@ export class DimensionService {
               content: [
                 {
                   type: "log",
-                  entries: [
+                  items: [
                     { label: "用户", value: "久夜 (权限级别: Θ)" },
                     { label: "查询", value: "净土安全协议" },
                     { label: "系统", value: "净土的滤网和防火墙会被攻破吗？" },
@@ -250,41 +250,63 @@ export class DimensionService {
               title: "Ⅱ：核心法则与特性",
               content: [
                 {
-                  type: "soulFlow",
+                  type: "structuredContent",
+                  style: "soul-flow",
                   title: "ⅰ. 灵魂筛选与净化：",
+                  highlights: ["ⅰ. 灵魂筛选与净化："],
                   items: [
-                    "唯有灵魂本质纯净（无深重罪孽纠缠）或罪孽已被彻底宽恕/救赎的灵魂方能抵达此地。",
-                    "彼岸花海与记忆溪流具有温和的净化作用，帮助灵魂褪去生前的痛苦、执念与残留的负面能量，回归平静的本质状态。"
-                  ],
-                  highlights: ["ⅰ. 灵魂筛选与净化："]
+                    {
+                      text: "唯有灵魂本质纯净（无深重罪孽纠缠）或罪孽已被彻底宽恕/救赎的灵魂方能抵达此地。"
+                    },
+                    {
+                      text: "彼岸花海与记忆溪流具有温和的净化作用，帮助灵魂褪去生前的痛苦、执念与残留的负面能量，回归平静的本质状态。"
+                    }
+                  ]
                 },
                 {
-                  type: "soulFlow",
+                  type: "structuredContent",
+                  style: "soul-flow",
                   title: "ⅱ. 安息与等待：",
+                  highlights: ["ⅱ. 安息与等待："],
                   items: [
-                    "灵魂在此地处于深度安眠与宁静状态，形态化为微光或融入花海/树的光辉中。",
-                    "等待周期漫长且不确定，直至归途之门为其开启，方意味着获得「回归本源」或「进入下一次生命循环」的资格。"
-                  ],
-                  highlights: ["ⅱ. 安息与等待："]
+                    {
+                      text: "灵魂在此地处于深度安眠与宁静状态，形态化为微光或融入花海/树的光辉中。"
+                    },
+                    {
+                      text: "等待周期漫长且不确定，直至归途之门为其开启，方意味着获得「回归本源」或「进入下一次生命循环」的资格。"
+                    }
+                  ]
                 },
                 {
-                  type: "soulFlow",
+                  type: "structuredContent",
+                  style: "soul-flow",
                   title: "ⅲ. 希塔娜的领域：",
+                  highlights: ["ⅲ. 希塔娜的领域："],
                   items: [
-                    "生命之神希塔娜的意识与权能弥漫整个维度，维系其存在与法则。她时刻关注着灵魂的安息进程。",
-                    "希月作为协理者，可在此地进行引导性巡视，安抚个别不安的灵魂（极为罕见），并定期向母亲大人汇报维度的稳定情况。"
-                  ],
-                  highlights: ["ⅲ. 希塔娜的领域："]
+                    {
+                      text: "生命之神希塔娜的意识与权能弥漫整个维度，维系其存在与法则。她时刻关注着灵魂的安息进程。"
+                    },
+                    {
+                      text: "希月作为协理者，可在此地进行引导性巡视，安抚个别不安的灵魂（极为罕见），并定期向母亲大人汇报维度的稳定情况。"
+                    }
+                  ]
                 },
                 {
-                  type: "soulFlow",
+                  type: "structuredContent",
+                  style: "soul-flow",
                   title: "ⅳ. 自主防御：",
+                  highlights: ["ⅳ. 自主防御："],
                   items: [
-                    "生者或带有强烈恶意的存在（如试图窃取灵魂或破坏循环者）若强行闯入，将立即被轮回之地排斥。",
-                    "彼岸花会缠绕束缚入侵者，地脉子树的光芒会灼烧其存在本质，最终将其强制驱逐回原属维度，并可能留下永久性的「生命印记」伤痕。",
-                    "归途之门对生者绝对封闭，强行触碰将导致灵魂震荡甚至部分剥离。"
-                  ],
-                  highlights: ["ⅳ. 自主防御："]
+                    {
+                      text: "生者或带有强烈恶意的存在（如试图窃取灵魂或破坏循环者）若强行闯入，将立即被轮回之地排斥。"
+                    },
+                    {
+                      text: "彼岸花会缠绕束缚入侵者，地脉子树的光芒会灼烧其存在本质，最终将其强制驱逐回原属维度，并可能留下永久性的「生命印记」伤痕。"
+                    },
+                    {
+                      text: "归途之门对生者绝对封闭，强行触碰将导致灵魂震荡甚至部分剥离。"
+                    }
+                  ]
                 }
               ]
             },
@@ -339,7 +361,7 @@ export class DimensionService {
               content: [
                 {
                   type: "log",
-                  entries: [
+                  items: [
                     { label: "用户", value: "希月 (权限级别: Ψ)" },
                     { label: "查询", value: "轮回之地当前状态" },
                     { label: "系统", value: "灵魂流稳定，记忆溪流灯盏数量：█████" },
@@ -378,7 +400,8 @@ export class DimensionService {
               title: "Ⅰ：现象定性",
               content: [
                 {
-                  type: "phenomenon",
+                  type: "structuredContent",
+                  style: "phenomenon",
                   items: [
                     {
                       label: "代号：",
@@ -410,7 +433,8 @@ export class DimensionService {
               title: "Ⅱ：空间结构解析",
               content: [
                 {
-                  type: "phenomenon",
+                  type: "structuredContent",
+                  style: "phenomenon",
                   title: "ⅰ. 天穹：",
                   items: [
                     "- 无光源的纯黑幕布，悬浮无数颗恒定白光星体（非真实恒星，系『虚无』锚点）。",
@@ -419,7 +443,8 @@ export class DimensionService {
                   ]
                 },
                 {
-                  type: "phenomenon",
+                  type: "structuredContent",
+                  style: "phenomenon",
                   title: "ⅱ. 地面：",
                   items: [
                     "- 类似于水面，物质暂且未知,具有生成倒影的属性。但或许是虚无本质",
@@ -427,7 +452,8 @@ export class DimensionService {
                   ]
                 },
                 {
-                  type: "phenomenon",
+                  type: "structuredContent",
+                  style: "phenomenon",
                   title: "ⅲ. 色彩法则：",
                   items: [
                     "- 强制剥离除蓝色/紫色/绿色一切色彩（原理：波长＞450nm的光子被虚粒子分解）",
@@ -445,7 +471,8 @@ export class DimensionService {
                   text: "进入「虚无视界」的个体将经历以下层级解离："
                 },
                 {
-                  type: "phenomenon",
+                  type: "structuredContent",
+                  style: "phenomenon",
                   title: "ⅰ. 感官剥离：",
                   items: [
                     "- 视觉：除蓝/紫/绿色外，一切色彩被强制抽离，世界仅剩黑白灰的单调轮廓。",
@@ -455,7 +482,8 @@ export class DimensionService {
                   highlights: ["ⅰ. 感官剥离："]
                 },
                 {
-                  type: "phenomenon",
+                  type: "structuredContent",
+                  style: "phenomenon",
                   title: "ⅱ. 认知侵蚀：",
                   items: [
                     "- 长期滞留者会逐渐混淆「信息态」与现实，例如将自身倒影误认为另一个体，或产生「存在意义被黑洞吞噬」的妄想。",
@@ -470,7 +498,8 @@ export class DimensionService {
               title: "Ⅳ：特殊效应",
               content: [
                 {
-                  type: "phenomenon",
+                  type: "structuredContent",
+                  style: "phenomenon",
                   title: "ⅰ. 「真我」豁免：",
                   items: [
                     "- 星荧姐姐与我的权能可免疫色彩剥离，其身影成为视界内唯二的鲜明存在（蓝紫色光尘轨迹不受影响）。",
@@ -479,7 +508,8 @@ export class DimensionService {
                   highlights: ["ⅰ. 「真我」豁免："]
                 },
                 {
-                  type: "phenomenon",
+                  type: "structuredContent",
+                  style: "phenomenon",
                   title: "ⅱ. 空间悖论：",
                   items: [
                     "- 任何试图攻击黑洞或白光星体的行为均会触发「因果反弹」，攻击者将承受等同伤害的「存在稀释」（例：挥刀劈砍星体，自身躯干对应部位透明化）。"
@@ -503,7 +533,7 @@ export class DimensionService {
               content: [
                 {
                   type: "log",
-                  entries: [
+                  items: [
                     { label: "用户", value: "久夜 (权限级别: Ω)" },
                     { label: "查询", value: "虚无视界现象档案" },
                     { label: "系统", value: "档案完整，警告 - 存在解离效应活跃" },
@@ -547,9 +577,10 @@ export class DimensionService {
               title: "Ⅰ：梦境记录 - 艾瑟尔·维洛斯的书中",
               content: [
                 {
-                  type: "dreamRecord",
-                  character: "星荧（Emberstar）",
-                  entries: [
+                  type: "structuredContent",
+                  style: "dream-record",
+                  subtitle: "星荧（Emberstar）",
+                  items: [
                     {
                       label: "常规梦境：",
                       value: "净土边缘的雪原，中央矗立冰结苹果树，树下有着一张木质桌子，上面摆放着茶具，桌子旁边有七条凳子和一个大的凳子。"
@@ -562,9 +593,10 @@ export class DimensionService {
                   highlights: ["星荧（Emberstar）"]
                 },
                 {
-                  type: "dreamRecord",
-                  character: "璃梦（Lumielle）",
-                  entries: [
+                  type: "structuredContent",
+                  style: "dream-record",
+                  subtitle: "璃梦（Lumielle）",
+                  items: [
                     {
                       label: "常规梦境：",
                       value: "一座被藤蔓缠绕的古老钟楼，钟摆静止在午夜时分，周围弥漫着淡紫色的雾气。"
@@ -577,9 +609,10 @@ export class DimensionService {
                   highlights: ["璃梦（Lumielle）"]
                 },
                 {
-                  type: "dreamRecord",
-                  character: "希月（Cielune）",
-                  entries: [
+                  type: "structuredContent",
+                  style: "dream-record",
+                  subtitle: "希月（Cielune）",
+                  items: [
                     {
                       label: "常规梦境：",
                       value: "一片无边无际的蒲公英田野，中央有一棵半枯半荣的巨树，树下悬浮着一架透明天平。"
@@ -592,9 +625,11 @@ export class DimensionService {
                   highlights: ["希月（Cielune）"]
                 },
                 {
-                  type: "dreamRecord",
-                  character: "久夜（Seren）",
-                  entries: [
+                  type: "structuredContent",
+                  style: "dream-record",
+                  subtitle: "久夜（Seren）",
+                  highlights: ["久夜（Seren）"],
+                  items: [
                     {
                       label: "常规梦境：",
                       value: "一片缀满星光的浅滩，潮汐规律地冲刷着沙地上发光的符文。"
@@ -603,8 +638,7 @@ export class DimensionService {
                       label: "异常：",
                       value: "当其中一团光晕微弱时，花房会渗出淡蓝色雾气；若久夜产生自我怀疑，浅滩会凝结成镜面。"
                     }
-                  ],
-                  highlights: ["久夜（Seren）"]
+                  ]
                 }
               ]
             },
@@ -612,9 +646,10 @@ export class DimensionService {
               title: "Ⅱ：管理者的观测日志",
               content: [
                 {
-                  type: "dreamRecord",
-                  character: "星荧的梦境日常",
-                  entries: [
+                  type: "structuredContent",
+                  style: "dream-record",
+                  subtitle: "星荧的梦境日常",
+                  items: [
                     {
                       label: "观测状态：",
                       value: "稳定（无异常波动）"
@@ -631,9 +666,10 @@ export class DimensionService {
                   highlights: ["星荧的梦境日常"]
                 },
                 {
-                  type: "dreamRecord",
-                  character: "璃梦的梦境日常",
-                  entries: [
+                  type: "structuredContent",
+                  style: "dream-record",
+                  subtitle: "璃梦的梦境日常",
+                  items: [
                     {
                       label: "观测状态：",
                       value: "轻微波动（死亡之神权能残留）"
@@ -650,9 +686,10 @@ export class DimensionService {
                   highlights: ["璃梦的梦境日常"]
                 },
                 {
-                  type: "dreamRecord",
-                  character: "希月的梦境日常",
-                  entries: [
+                  type: "structuredContent",
+                  style: "dream-record",
+                  subtitle: "希月的梦境日常",
+                  items: [
                     {
                       label: "观测状态：",
                       value: "平衡（无倾斜迹象）"
@@ -674,23 +711,19 @@ export class DimensionService {
               title: "Ⅲ：异常实体：梦魇（Nightmare）",
               content: [
                 {
-                  type: "dreamRecord",
-                  character: "存在形式",
-                  entries: [
-                    {
-                      label: "",
-                      value: "梦魇没有固定的形态，可以根据梦境者的恐惧和不安变化形态，常见的有黑暗阴影、恐怖生物或扭曲的形象。"
-                    },
-                    {
-                      label: "",
-                      value: "梦魇通常出现在梦境者情绪不稳定或受到外部压力时，它们会利用梦境者的恐惧和不安来增强自己的力量。"
-                    }
+                  type: "structuredContent",
+                  style: "dream-record",
+                  subtitle: "存在形式",
+                  items: [
+                    "梦魇没有固定的形态，可以根据梦境者的恐惧和不安变化形态，常见的有黑暗阴影、恐怖生物或扭曲的形象。",
+                    "梦魇通常出现在梦境者情绪不稳定或受到外部压力时，它们会利用梦境者的恐惧和不安来增强自己的力量。"
                   ]
                 },
                 {
-                  type: "dreamRecord",
-                  character: "能力与弱点",
-                  entries: [
+                  type: "structuredContent",
+                  style: "dream-record",
+                  subtitle: "能力与弱点",
+                  items: [
                     {
                       label: "能力：",
                       value: "影响梦境者的情绪，改变梦境内容，干扰梦境者的思维。"
@@ -722,7 +755,7 @@ export class DimensionService {
               content: [
                 {
                   type: "log",
-                  entries: [
+                  items: [
                     { label: "用户", value: "艾瑟尔·维洛斯 (权限级别: Ω)" },
                     { label: "查询", value: "梦境世界档案更新" },
                     { label: "系统", value: "档案同步完成，梦境稳定性监测中" },
@@ -756,7 +789,7 @@ export class DimensionService {
 
   // 检查用户是否有权限访问指定维度
   hasPermission(dimensionId, userPermissionLevel) {
-    const requiredLevel = this.dimensionPermissions[dimensionId];
+    const requiredLevel = this.getRequiredPermission(dimensionId);
     return userPermissionLevel >= requiredLevel;
   }
 
