@@ -30,7 +30,7 @@ defineProps({
 .dream-record {
   margin: 20px 0;
   padding: 20px;
-  border: 1px dashed #a366ff;
+  border: 1px dashed var(--secondary-color, #a366ff);
   border-radius: 10px;
   background: rgba(30, 15, 60, 0.4);
   box-shadow: 0 0 15px rgba(168, 119, 255, 0.2);
@@ -38,9 +38,9 @@ defineProps({
 }
 
 .character-name {
-  color: #ffccff;
+  color: var(--highlight-color, #ffccff);
   margin: 0 0 15px 0;
-  text-shadow: 0 0 5px #ff99ff;
+  text-shadow: 0 0 5px var(--highlight-color, #ff99ff);
 }
 
 .dream-entry {
@@ -52,9 +52,9 @@ defineProps({
 }
 
 .entry-label span:first-child {
-  color: #ffccff;
+  color: var(--highlight-color, #ffccff);
   font-weight: bold;
-  text-shadow: 0 0 3px #ff99ff;
+  text-shadow: 0 0 3px var(--highlight-color, #ff99ff);
 }
 
 .entry-value {

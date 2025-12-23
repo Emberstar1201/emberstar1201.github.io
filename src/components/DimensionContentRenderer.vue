@@ -96,7 +96,7 @@ defineProps({
 
 <style scoped>
 .dimension-content-renderer {
-  color: #00ffff;
+  color: var(--primary-color, #00ffff);
   line-height: 1.6;
   height: 100%;
   overflow-y: auto;
@@ -108,10 +108,10 @@ defineProps({
 }
 
 .section h2 {
-  color: #66ffff;
+  color: var(--secondary-color, #66ffff);
   margin: 25px 0 15px;
-  border-bottom: 1px dashed #0066ff;
+  border-bottom: 1px dashed var(--border-color, #0066ff);
   padding-bottom: 8px;
-  text-shadow: 0 0 5px #66ffff;
+  text-shadow: 0 0 5px var(--secondary-color, #66ffff);
 }
 </style>

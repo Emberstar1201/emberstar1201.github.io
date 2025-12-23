@@ -33,7 +33,7 @@ defineProps({
 }
 
 .subsection h3 {
-  color: #55ddff;
+  color: var(--secondary-color, #55ddff);
   margin: 15px 0 10px;
   font-size: 1.1rem;
 }

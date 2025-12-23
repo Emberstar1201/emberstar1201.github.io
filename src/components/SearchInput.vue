@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { queryCharacters } from '../services/characterService';
+import { dimensionService } from '../services/dimensionService';
 
 // 响应式变量
 const searchQuery = ref('');
@@ -19,21 +20,16 @@ const SEARCH_TYPES = {
   COMMAND: '命令'
 };
 
-// 模拟搜索数据
-const mockSearchData = [
+// 系统命令数据
+const systemCommands = [
   { id: 1, name: '角色', type: SEARCH_TYPES.CHARACTER, detail: '角色档案资料', route: '/system/character' },
-  { id: 2, name: '维度', type: SEARCH_TYPES.DIMENSION, detail: '维度档案资料', route: '/system/dimension' },
-  { id: 3, name: '监控', type: SEARCH_TYPES.COMMAND, detail: '系统状态实时监控', route: '/system/monitor' },
-  { id: 4, name: '守护', type: SEARCH_TYPES.COMMAND, detail: '系统安全守护', route: '/system/defender' },
-  { id: 5, name: '灵魂频率', type: SEARCH_TYPES.COMMAND, detail: '灵魂频率分析', route: '/system/soul-frequency' },
-  { id: 6, name: '角色档案', type: SEARCH_TYPES.CHARACTER, detail: '查看所有角色信息', route: '/system/character' },
-  { id: 7, name: '维度档案', type: SEARCH_TYPES.DIMENSION, detail: '查看所有维度信息', route: '/system/dimension' },
-  { id: 8, name: '监控视图', type: SEARCH_TYPES.COMMAND, detail: '实时监控系统状态', route: '/system/monitor' },
-  { id: 9, name: '守护视图', type: SEARCH_TYPES.COMMAND, detail: '查看系统安全守护', route: '/system/defender' },
-  { id: 10, name: '余烬净土', type: SEARCH_TYPES.DIMENSION, detail: '星荧的庇护所', route: '/system/dimension', dimension: 'pureland' },
-  { id: 11, name: '轮回之地', type: SEARCH_TYPES.DIMENSION, detail: '灵魂的归宿', route: '/system/dimension', dimension: 'cycle' },
-  { id: 12, name: '虚无视界', type: SEARCH_TYPES.DIMENSION, detail: '虚无的领域', route: '/system/dimension', dimension: 'void' },
-  { id: 13, name: '梦境世界', type: SEARCH_TYPES.DIMENSION, detail: '梦境的空间', route: '/system/dimension', dimension: 'dream' }
+  { id: 2, name: '监控', type: SEARCH_TYPES.COMMAND, detail: '系统状态实时监控', route: '/system/monitor' },
+  { id: 3, name: '守护', type: SEARCH_TYPES.COMMAND, detail: '系统安全守护', route: '/system/defender' },
+  { id: 4, name: '灵魂频率', type: SEARCH_TYPES.COMMAND, detail: '灵魂频率分析', route: '/system/soul-frequency' },
+  { id: 5, name: '角色档案', type: SEARCH_TYPES.CHARACTER, detail: '查看所有角色信息', route: '/system/character' },
+  { id: 6, name: '维度档案', type: SEARCH_TYPES.DIMENSION, detail: '查看所有维度信息', route: '/system/dimension' },
+  { id: 7, name: '监控视图', type: SEARCH_TYPES.COMMAND, detail: '实时监控系统状态', route: '/system/monitor' },
+  { id: 8, name: '守护视图', type: SEARCH_TYPES.COMMAND, detail: '查看系统安全守护', route: '/system/defender' }
 ];
 
 // 计算属性：根据搜索词过滤结果
@@ -61,8 +57,23 @@ const filteredResults = computed(() => {
     });
   }
   
-  // 2. 添加模拟数据（非角色部分）
-  const mockResults = mockSearchData.filter(item => 
+  // 2. 添加真实维度数据
+  const dimensionResults = dimensionService.searchDimensions(query);
+  if (dimensionResults.length > 0) {
+    dimensionResults.forEach(dimension => {
+      results.push({
+        id: `dimension-${dimension.id}`,
+        name: dimension.name,
+        type: SEARCH_TYPES.DIMENSION,
+        detail: dimension.detail,
+        route: dimension.route,
+        dimension: dimension.dimension
+      });
+    });
+  }
+  
+  // 3. 添加系统命令数据
+  const commandResults = systemCommands.filter(item => 
     item.type !== SEARCH_TYPES.CHARACTER && (
       item.name.toLowerCase().includes(query) ||
       item.detail.toLowerCase().includes(query) ||
@@ -70,7 +81,7 @@ const filteredResults = computed(() => {
     )
   );
   
-  return [...results, ...mockResults];
+  return [...results, ...commandResults];
 });
 
 // 输入框变化处理函数

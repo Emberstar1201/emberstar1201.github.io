@@ -36,7 +36,7 @@ defineProps({
 }
 
 .log-label {
-  color: #00ffff;
+  color: var(--primary-color, #00ffff);
   margin-right: 10px;
   min-width: 80px;
   font-weight: bold;

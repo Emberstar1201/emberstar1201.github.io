@@ -101,11 +101,11 @@ const requiredPermissionLevel = computed(() => {
 </template>
 
 <style scoped>
-
+/* 布局样式 */
 .main-container {
   display: flex;
   gap: 20px;
-  height: calc(100% - 50px); /* 减去标题高度 */
+  height: calc(100% - 50px);
 }
 
 .sub-nav {
@@ -115,7 +115,7 @@ const requiredPermissionLevel = computed(() => {
   margin-bottom: 15px;
   list-style-type: none;
   position: sticky;
-  top: 50px; /* 标题高度 */
+  top: 50px;
   align-self: flex-start;
 }
 
@@ -126,6 +126,7 @@ const requiredPermissionLevel = computed(() => {
   padding-right: 10px;
 }
 
+/* 导航样式 */
 .sub-nav-item {
   padding: 8px 12px;
   margin-bottom: 5px;
@@ -167,157 +168,44 @@ const requiredPermissionLevel = computed(() => {
   opacity: 0.8;
 }
 
-/* 维度档案内容样式 */
-.dimension-content {
-  color: #00ffff;
-  line-height: 1.6;
+/* 维度容器样式 */
+.dimension-container {
   height: 100%;
   overflow-y: auto;
+}
+
+/* 维度内容基础样式 */
+.dimension-content {
+  height: 100%;
   padding-right: 5px;
 }
 
-.dimension-content.active {
-  display: block;
-}
-
-/* 净土样式 */
+/* 维度特定颜色主题 */
 .pureland-content {
-  color: #00ffff;
+  --primary-color: #00ffff;
+  --secondary-color: #66ffff;
+  --border-color: #0066ff;
+  --highlight-color: #ffff66;
 }
 
-.pureland-content h2 {
-  color: #66ffff;
-  margin: 25px 0 15px;
-  border-bottom: 1px dashed #0066ff;
-  padding-bottom: 8px;
-  text-shadow: 0 0 5px #66ffff;
-}
-
-.pureland-content .highlight {
-  color: #ffff66;
-  font-weight: bold;
-}
-
-.pureland-content .quote {
-  border-left: 3px solid #00ffff;
-  padding-left: 15px;
-  margin: 20px 0;
-  font-style: italic;
-  opacity: 0.9;
-}
-
-/* 轮回之地样式 */
 .cycle-content {
-  color: #a0f0a0;
+  --primary-color: #a0f0a0;
+  --secondary-color: #90e090;
+  --border-color: #408040;
+  --highlight-color: #e0ffa0;
 }
 
-.cycle-content h2 {
-  color: #90e090;
-  margin: 25px 0 15px;
-  border-bottom: 1px dashed #408040;
-  padding-bottom: 8px;
-  text-shadow: 0 0 5px #90e090;
-}
-
-.cycle-content .highlight {
-  color: #e0ffa0;
-  font-weight: bold;
-}
-
-.cycle-content .quote {
-  border-left: 3px solid #70c070;
-  padding-left: 15px;
-  margin: 20px 0;
-  font-style: italic;
-  opacity: 0.9;
-  background: rgba(16, 48, 16, 0.3);
-  padding: 15px;
-  border-radius: 0 5px 5px 0;
-}
-
-.soul-flow {
-  position: relative;
-  padding: 15px;
-  margin: 15px 0;
-  border: 1px dashed #70c070;
-  border-radius: 5px;
-  background: rgba(16, 48, 16, 0.2);
-}
-
-/* 虚无视界样式 */
 .void-content {
-  color: #a0a0ff;
+  --primary-color: #a0a0ff;
+  --secondary-color: #9090e0;
+  --border-color: #5050a0;
+  --highlight-color: #e0e0ff;
 }
 
-.void-content h2 {
-  color: #9090e0;
-  margin: 25px 0 15px;
-  border-bottom: 1px dashed #5050a0;
-  padding-bottom: 8px;
-  text-shadow: 0 0 5px #9090e0;
-}
-
-.void-content .highlight {
-  color: #e0e0ff;
-  font-weight: bold;
-}
-
-.void-content .quote {
-  border-left: 3px solid #7070c0;
-  padding-left: 15px;
-  margin: 20px 0;
-  font-style: italic;
-  opacity: 0.9;
-  background: rgba(16, 16, 48, 0.3);
-  padding: 15px;
-  border-radius: 0 5px 5px 0;
-}
-
-.phenomenon {
-  margin: 15px 0;
-  padding: 15px;
-  border: 1px dashed #7070c0;
-  border-radius: 5px;
-  background: rgba(16, 16, 48, 0.2);
-}
-
-/* 梦境世界样式 */
 .dream-content {
-  color: #d8b3ff;
-}
-
-.dream-content h2 {
-  color: #c299ff;
-  margin: 25px 0 15px;
-  border-bottom: 1px dashed #8c52ff;
-  padding-bottom: 8px;
-  text-shadow: 0 0 8px #c299ff;
-}
-
-.dream-content .highlight {
-  color: #ffccff;
-  font-weight: bold;
-  text-shadow: 0 0 5px #ff99ff;
-}
-
-.dream-content .quote {
-  border-left: 3px solid #a366ff;
-  margin: 20px 0;
-  font-style: italic;
-  opacity: 0.9;
-  background: rgba(42, 21, 74, 0.3);
-  padding: 15px;
-  border-radius: 0 10px 10px 0;
-  box-shadow: 0 0 10px rgba(168, 119, 255, 0.2);
-}
-
-.dream-record {
-  margin: 20px 0;
-  padding: 20px;
-  border: 1px dashed #a366ff;
-  border-radius: 10px;
-  background: rgba(30, 15, 60, 0.4);
-  box-shadow: 0 0 15px rgba(168, 119, 255, 0.2);
-  transition: all 0.3s ease;
+  --primary-color: #d8b3ff;
+  --secondary-color: #c299ff;
+  --border-color: #8c52ff;
+  --highlight-color: #ffccff;
 }
 </style>

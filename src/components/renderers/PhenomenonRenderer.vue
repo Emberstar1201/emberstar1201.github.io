@@ -61,13 +61,13 @@ const processedItems = computed(() => {
 .phenomenon {
   margin: 15px 0;
   padding: 15px;
-  border: 1px dashed #7070c0;
+  border: 1px dashed var(--secondary-color, #7070c0);
   border-radius: 5px;
   background: rgba(16, 16, 48, 0.2);
 }
 
 .phenomenon-title {
-  color: #e0e0ff;
+  color: var(--highlight-color, #e0e0ff);
   margin-bottom: 10px;
   font-weight: bold;
 }
@@ -77,7 +77,7 @@ const processedItems = computed(() => {
 }
 
 .phenomenon-label span:first-child {
-  color: #e0e0ff;
+  color: var(--highlight-color, #e0e0ff);
   font-weight: bold;
 }
 

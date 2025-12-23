@@ -25,7 +25,7 @@ defineProps({
   position: relative;
   padding: 15px;
   margin: 15px 0;
-  border: 1px dashed #70c070;
+  border: 1px dashed var(--secondary-color, #70c070);
   border-radius: 5px;
   background: rgba(16, 48, 16, 0.2);
 }
@@ -33,7 +33,7 @@ defineProps({
 .soul-flow-title {
   font-weight: bold;
   margin-bottom: 10px;
-  color: #e0ffa0;
+  color: var(--highlight-color, #e0ffa0);
 }
 
 .soul-flow-item {

@@ -764,6 +764,196 @@ export class DimensionService {
   getRequiredPermission(dimensionId) {
     return this.dimensionPermissions[dimensionId] || 0;
   }
+
+  // 搜索维度
+  searchDimensions(query) {
+    if (!query || typeof query !== 'string') {
+      return [];
+    }
+
+    const searchQuery = query.toLowerCase().trim();
+    const results = [];
+
+    // 搜索维度名称
+    Object.keys(this.dimensions).forEach(dimensionId => {
+      const dimension = this.dimensions[dimensionId];
+      if (!dimension || !dimension.name) return;
+      
+      const name = typeof dimension.name === 'string' ? dimension.name.toLowerCase() : '';
+      const id = typeof dimensionId === 'string' ? dimensionId.toLowerCase() : '';
+
+      // 检查名称或ID是否匹配查询
+      if (name.includes(searchQuery) || id.includes(searchQuery)) {
+        results.push({
+          id: dimensionId,
+          name: dimension.name,
+          type: '维度',
+          detail: this.getDimensionDescription(dimensionId),
+          route: '/system/dimension',
+          dimension: dimensionId
+        });
+      }
+    });
+
+    // 搜索维度内容中的关键词
+    Object.keys(this.dimensions).forEach(dimensionId => {
+      const dimension = this.dimensions[dimensionId];
+      if (!dimension || !dimension.content || !dimension.content.sections) return;
+      
+      // 搜索章节标题
+      dimension.content.sections.forEach(section => {
+        if (!section || !section.title) return;
+        
+        const title = typeof section.title === 'string' ? section.title.toLowerCase() : '';
+        if (title.includes(searchQuery)) {
+          // 避免重复添加
+          const exists = results.some(r => r.id === dimensionId);
+          if (!exists) {
+            results.push({
+              id: dimensionId,
+              name: dimension.name,
+              type: '维度',
+              detail: `包含章节: ${section.title}`,
+              route: '/system/dimension',
+              dimension: dimensionId
+            });
+          }
+        }
+
+        // 搜索内容文本
+        if (section.content && Array.isArray(section.content)) {
+          section.content.forEach(contentItem => {
+            if (!contentItem) return;
+            
+            if (contentItem.text && typeof contentItem.text === 'string') {
+              const text = contentItem.text.toLowerCase();
+              if (text.includes(searchQuery)) {
+                // 避免重复添加
+                const exists = results.some(r => r.id === dimensionId);
+                if (!exists) {
+                  results.push({
+                    id: dimensionId,
+                    name: dimension.name,
+                    type: '维度',
+                    detail: `内容匹配: ${section.title}`,
+                    route: '/system/dimension',
+                    dimension: dimensionId
+                  });
+                }
+              }
+            }
+
+            // 搜索列表项
+            if (contentItem.items && Array.isArray(contentItem.items)) {
+              contentItem.items.forEach(item => {
+                if (!item) return;
+                
+                const itemText = typeof item.text === 'string' ? item.text : 
+                               typeof item === 'string' ? item : '';
+                if (itemText && typeof itemText === 'string') {
+                  const lowerItemText = itemText.toLowerCase();
+                  if (lowerItemText.includes(searchQuery)) {
+                    // 避免重复添加
+                    const exists = results.some(r => r.id === dimensionId);
+                    if (!exists) {
+                      results.push({
+                        id: dimensionId,
+                        name: dimension.name,
+                        type: '维度',
+                        detail: `内容匹配: ${section.title}`,
+                        route: '/system/dimension',
+                        dimension: dimensionId
+                      });
+                    }
+                  }
+                }
+              });
+            }
+          });
+        }
+      });
+    });
+
+    return results;
+  }
+
+  // 获取维度描述
+  getDimensionDescription(dimensionId) {
+    const dimension = this.dimensions[dimensionId];
+    if (!dimension || !dimension.content.sections || dimension.content.sections.length === 0) {
+      return '';
+    }
+
+    // 返回第一个章节的前50个字符作为描述
+    const firstSection = dimension.content.sections[0];
+    if (firstSection.content && firstSection.content.length > 0) {
+      const firstContent = firstSection.content[0];
+      if (firstContent.text) {
+        return firstContent.text.substring(0, 50) + '...';
+      }
+    }
+
+    return '';
+  }
+
+  // 获取所有可搜索的关键词
+  getSearchableKeywords() {
+    const keywords = new Set();
+
+    Object.keys(this.dimensions).forEach(dimensionId => {
+      const dimension = this.dimensions[dimensionId];
+      if (!dimension) return;
+      
+      // 添加维度名称和ID
+      if (dimension.name && typeof dimension.name === 'string') {
+        keywords.add(dimension.name);
+      }
+      if (dimensionId && typeof dimensionId === 'string') {
+        keywords.add(dimensionId);
+      }
+
+      // 添加章节标题
+      if (dimension.content && dimension.content.sections) {
+        dimension.content.sections.forEach(section => {
+          if (!section) return;
+          
+          if (section.title && typeof section.title === 'string') {
+            keywords.add(section.title);
+          }
+
+          // 添加内容中的关键词
+          if (section.content && Array.isArray(section.content)) {
+            section.content.forEach(contentItem => {
+              if (!contentItem) return;
+              
+              if (contentItem.text && typeof contentItem.text === 'string') {
+                // 提取文本中的关键词（这里可以优化为更智能的提取）
+                const words = contentItem.text.match(/[\u4e00-\u9fa5]+|[a-zA-Z]+/g);
+                if (words) {
+                  words.forEach(word => {
+                    if (word && word.length >= 2) { // 只添加长度>=2的词
+                      keywords.add(word);
+                    }
+                  });
+                }
+              }
+
+              // 添加高亮词汇
+              if (contentItem.highlights && Array.isArray(contentItem.highlights)) {
+                contentItem.highlights.forEach(highlight => {
+                  if (highlight && typeof highlight === 'string') {
+                    keywords.add(highlight);
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+
+    return Array.from(keywords);
+  }
 }
 
 // 创建单例实例

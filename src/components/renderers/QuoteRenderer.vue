@@ -23,7 +23,7 @@ const formattedText = computed(() => {
 
 <style scoped>
 .quote {
-  border-left: 3px solid #00ffff;
+  border-left: 3px solid var(--primary-color, #00ffff);
   padding-left: 15px;
   margin: 20px 0;
   font-style: italic;

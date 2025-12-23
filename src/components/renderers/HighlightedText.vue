@@ -80,7 +80,7 @@ const processedText = computed(() => {
 
 <style scoped>
 .highlight {
-  color: #ffff66;
+  color: var(--highlight-color, #ffff66);
   font-weight: bold;
 }
 
