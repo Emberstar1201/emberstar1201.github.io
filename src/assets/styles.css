@@ -1,0 +1,85 @@
+@font-face {
+    font-family: 'Monospace';
+    src: local('Courier New');
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: #0a0a12;
+    margin: 15px;
+    overflow: hidden;
+    font-family: 'Monospace', monospace;
+    color: #00ffff;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    touch-action: manipulation;
+    transition: filter 1s ease;
+}
+
+body.desaturate {
+    filter: grayscale(100%) brightness(0.8);
+}
+
+.content-title {
+    background-color: #0a0a12;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    color: #00aaff;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+    padding-bottom: 5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.content-section {
+    margin-bottom: 20px;
+}
+
+.content-section h3 {
+    color: #00ffff;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.content-section p {
+    line-height: 1.5;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 255, 0.5);
+}
+
+.blink {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}

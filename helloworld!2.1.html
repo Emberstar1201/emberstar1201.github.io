@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMBERSTAR OS</title>
+    <link rel="stylesheet" href="/src/assets/styles.css">
+</head>
+<body>
+    <div class="container">
+        
+
+
+        <!-- 系统界面 -->
+        <div class="system-interface" id="systemInterface">
+            <div class="desktop">
+
+                
+
+                
+                <!-- 临时权限输入框 -->
+                <div class="temp-permission-input" id="tempPermissionInput" style="display: none;">
+                    <input type="text" id="permissionKeyInput" placeholder="输入临时权限密钥">
+                    <button id="applyPermissionKey">应用密钥</button>
+                </div>
+                
+                <div class="main-content">
+                    <div class="sidebar">
+                        <div class="sidebar-title">系统导航</div>
+                        <div class="start-button" id="startButton">开始</div>
+                        <div class="effects-toggle" id="effectsToggle">星尘特效: 光轨版</div>
+                        <div class="nav-item active" data-content="monitor">日常检测报告</div>
+                        <div class="nav-item" data-content="defense">防御系统</div>
+                        <div class="nav-item" data-content="soul-frequency">灵魂频率监测</div>
+                        <div class="nav-item" data-content="character-archive">角色档案资料</div>
+                        <div class="nav-item" data-content="dimension-archive">维度档案资料</div>
+                        <div class="sub-nav active" id="dimensionSubNav">
+                            <div class="sub-nav-item active" data-dimension="pureland" data-permission="1">净土</div>
+                            <div class="sub-nav-item" data-dimension="cycle" data-permission="1">轮回之地</div>
+                            <div class="sub-nav-item" data-dimension="void" data-permission="2">虚无视界</div>
+                            <div class="sub-nav-item" data-dimension="dream" data-permission="2">梦境世界</div>
+                        </div>
+                    </div>
+                    
+                    <div class="content-area">
+
+                    </div>
+                </div>
+            </div>
+            <div class="taskbar">
+                <!-- 开始按钮已移动到侧边栏 -->
+            </div>
+        </div>
+        
+        <!-- 五子棋游戏界面 -->
+        <div class="gomoku-game" id="gomokuGame">
+            <div class="gomoku-header">
+                <div class="gomoku-title">五子棋</div>
+                <div class="gomoku-controls">
+                    <button class="gomoku-button" id="restartButton">重新开始</button>
+                    <button class="gomoku-button" id="closeGameButton">关闭游戏</button>
+                </div>
+            </div>
+            <div class="gomoku-board" id="gomokuBoard"></div>
+            <div class="gomoku-status" id="gomokuStatus">黑方回合</div>
+        </div>
+    </div>
+
+    <script>
+
+        // 维度数据
+        const dimensions = [
+            {
+                id: "pureland",
+                name: "净土",
+                type: "dimension",
+                description: "由『始源』之神于陨落前创造的独立维度，游离于现实之外，作为世界尽头的终极庇护所。"
+            },
+            {
+                id: "cycle",
+                name: "轮回之地",
+                type: "dimension",
+                description: "由生命之神-希塔娜创造的灵魂归宿维度，独立于生者世界之外。"
+            },
+            {
+                id: "void",
+                name: "虚无视界",
+                type: "dimension",
+                description: "由『虚无』权能展开的法则级领域，其本质为『剥离存在色彩，暴露世界底层逻辑』的夹缝空间。"
+            },
+            {
+                id: "dream",
+                name: "梦境世界",
+                type: "dimension",
+                description: "由众生意念与『始源』权能共鸣生成的潜意识投影空间，无恒定物理形态。"
+            }
+        ];
+
+        // 临时权限密钥
+        const TEMPORARY_PERMISSION_KEY = "EMBERSTAR_OS_TEMP_KEY_14200";
+        const TEMPORARY_PERMISSION_DURATION = 30 * 60 * 1000; // 30分钟
+
+        // 当前用户信息
+        let currentUser = null;
+        let tempPermissionActive = false;
+        let tempPermissionExpiry = null;
+        
+        // 特效模式：true为光轨版，false为旧版星尘
+        let isLightTrailMode = true;
+
+        
+        // 创建星尘特效
+        function createStardust(x, y, count = 1, isClick = false) {
+            for (let i = 0; i < count; i++) {
+                const stardust = document.createElement('div');
+                stardust.className = 'stardust';
+                
+                // 随机选择颜色
+                const colors = ['#00ffff', '#ffffff', '#d8b3ff']; // 蓝、白、紫
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                stardust.style.backgroundColor = color;
+                
+                // 随机大小
+                const size = isClick ? Math.random() * 12 + 6 : Math.random() * 8 + 4;
+                stardust.style.width = `${size}px`;
+                stardust.style.height = `${size}px`;
+                
+                // 随机移动方向
+                const tx = (Math.random() - 0.5) * (isClick ? 200 : 100);
+                const ty = (Math.random() - 0.5) * (isClick ? 200 : 100);
+                stardust.style.setProperty('--tx', `${tx}px`);
+                stardust.style.setProperty('--ty', `${ty}px`);
+                
+                // 设置位置
+                const offsetX = isClick ? (Math.random() - 0.5) * 50 : 0;
+                const offsetY = isClick ? (Math.random() - 0.5) * 50 : 0;
+                stardust.style.left = `${x + offsetX}px`;
+                stardust.style.top = `${y + offsetY}px`;
+                
+                document.body.appendChild(stardust);
+                
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    if (stardust.parentNode) {
+                        stardust.parentNode.removeChild(stardust);
+                    }
+                }, 1500);
+            }
+        }
+        
+        // 创建光轨特效
+        function createLightTrail(x, y, count = 1, isClick = false) {
+            for (let i = 0; i < count; i++) {
+                const lightTrail = document.createElement('div');
+                lightTrail.className = 'light-trail';
+                
+                // 随机大小
+                const size = isClick ? Math.random() * 25 + 15 : Math.random() * 20 + 10;
+                lightTrail.style.width = `${size}px`;
+                lightTrail.style.height = `${size}px`;
+                
+                // 设置位置
+                const offsetX = isClick ? (Math.random() - 0.5) * 30 : 0;
+                const offsetY = isClick ? (Math.random() - 0.5) * 30 : 0;
+                lightTrail.style.left = `${x + offsetX}px`;
+                lightTrail.style.top = `${y + offsetY}px`;
+                
+                document.body.appendChild(lightTrail);
+                
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    if (lightTrail.parentNode) {
+                        lightTrail.parentNode.removeChild(lightTrail);
+                    }
+                }, 800);
+            }
+        }
+        
+        // 切换特效模式
+        function toggleEffectsMode() {
+            isLightTrailMode = !isLightTrailMode;
+            const effectsToggle = document.getElementById('effectsToggle');
+            if (effectsToggle) {
+                effectsToggle.textContent = isLightTrailMode ? '星尘特效: 光轨版' : '星尘特效: 旧版';
+            }
+        }
+        
+        // 创建特效（根据当前模式）
+        function createEffect(x, y, count = 1, isClick = false) {
+            if (isLightTrailMode) {
+                createLightTrail(x, y, count, isClick);
+            } else {
+                createStardust(x, y, count, isClick);
+            }
+        }
+        
+        // 打字机效果
+        function typeWriter(element, text, speed = 100) {
+            return new Promise(resolve => {
+                let i = 0;
+                element.textContent = '';
+                
+                function type() {
+                    if (i < text.length) {
+                        element.textContent += text.charAt(i);
+                        i++;
+                        setTimeout(type, speed);
+                    } else {
+                        resolve();
+                    }
+                }
+                type();
+            });
+        }
+
+        
+        // 更新系统时间
+        function updateSystemTime() {
+            const systemTime = document.getElementById('systemTime');
+            const lastHeartbeat = document.getElementById('lastHeartbeat');
+            const now = new Date();
+            const timeString = `始源历14200年1月${now.getDate()}日 ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            const heartbeatString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            
+            if (systemTime) systemTime.textContent = timeString;
+            if (lastHeartbeat) lastHeartbeat.textContent = heartbeatString;
+            
+            // 检查临时权限是否过期
+            if (tempPermissionActive && tempPermissionExpiry && now.getTime() > tempPermissionExpiry) {
+                deactivateTempPermission();
+            }
+        }
+        
+        // 五子棋游戏逻辑
+        function initGomokuGame() {
+            const board = document.getElementById('gomokuBoard');
+            const status = document.getElementById('gomokuStatus');
+            const restartButton = document.getElementById('restartButton');
+            const closeGameButton = document.getElementById('closeGameButton');
+            
+            // 游戏状态
+            let currentPlayer = 'black'; // 黑方先行
+            let gameOver = false;
+            let boardState = Array(21).fill().map(() => Array(21).fill(null));
+            
+            // 创建棋盘
+            function createBoard() {
+                board.innerHTML = '';
+                for (let i = 0; i < 21; i++) {
+                    for (let j = 0; j < 21; j++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'gomoku-cell';
+                        cell.dataset.row = i;
+                        cell.dataset.col = j;
+                        cell.addEventListener('click', handleCellClick);
+                        board.appendChild(cell);
+                    }
+                }
+            }
+            
+            // 处理点击单元格
+            function handleCellClick(e) {
+                if (gameOver) return;
+                
+                const row = parseInt(e.target.dataset.row);
+                const col = parseInt(e.target.dataset.col);
+                
+                // 如果该位置已经有棋子，则忽略
+                if (boardState[row][col]) return;
+                
+                // 放置棋子
+                placePiece(row, col);
+                
+                // 检查胜负
+                if (checkWin(row, col)) {
+                    gameOver = true;
+                    status.textContent = `${currentPlayer === 'black' ? '黑方' : '白方'}获胜！`;
+                    return;
+                }
+                
+                // 切换玩家
+                currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+                status.textContent = `${currentPlayer === 'black' ? '黑方' : '白方'}回合`;
+            }
+            
+            // 放置棋子
+            function placePiece(row, col) {
+                boardState[row][col] = currentPlayer;
+                
+                const cell = document.querySelector(`.gomoku-cell[data-row="${row}"][data-col="${col}"]`);
+                const piece = document.createElement('div');
+                piece.className = `gomoku-piece ${currentPlayer}-piece`;
+                cell.appendChild(piece);
+            }
+            
+            // 检查胜负
+            function checkWin(row, col) {
+                const directions = [
+                    [0, 1],   // 水平
+                    [1, 0],   // 垂直
+                    [1, 1],   // 对角线
+                    [1, -1]   // 反对角线
+                ];
+                
+                for (const [dx, dy] of directions) {
+                    let count = 1;
+                    
+                    // 正向检查
+                    for (let i = 1; i <= 4; i++) {
+                        const newRow = row + i * dx;
+                        const newCol = col + i * dy;
+                        
+                        if (
+                            newRow >= 0 && newRow < 21 &&
+                            newCol >= 0 && newCol < 21 &&
+                            boardState[newRow][newCol] === currentPlayer
+                        ) {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    // 反向检查
+                    for (let i = 1; i <= 4; i++) {
+                        const newRow = row - i * dx;
+                        const newCol = col - i * dy;
+                        
+                        if (
+                            newRow >= 0 && newRow < 21 &&
+                            newCol >= 0 && newCol < 21 &&
+                            boardState[newRow][newCol] === currentPlayer
+                        ) {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    if (count >= 5) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+            
+            // 重新开始游戏
+            function restartGame() {
+                currentPlayer = 'black';
+                gameOver = false;
+                boardState = Array(21).fill().map(() => Array(21).fill(null));
+                createBoard();
+                status.textContent = '黑方回合';
+            }
+            
+            // 初始化游戏
+            createBoard();
+            
+            // 事件监听
+            restartButton.addEventListener('click', restartGame);
+            closeGameButton.addEventListener('click', () => {
+                document.getElementById('gomokuGame').classList.remove('active');
+            });
+        }
+
+        // 创建灵魂频率监测界面
+        function createSoulFrequencyMonitoring() {
+            const soulGrid = document.getElementById('soulGrid');
+            soulGrid.innerHTML = '';
+            
+            soulData.forEach(soul => {
+                const soulCard = document.createElement('div');
+                soulCard.className = 'soul-card';
+                
+                // 如果是已逝的灵魂，添加特殊样式
+                if (soul.deceased) {
+                    soulCard.classList.add('soul-deceased');
+                }
+                
+                // 如果是濒死状态，添加濒死样式
+                if (soul.dying) {
+                    soulCard.classList.add('soul-dying');
+                }
+                
+                soulCard.innerHTML = `
+                    <div class="soul-name">${soul.name}</div>
+                    <div class="soul-visualization">
+                        <div class="soul-core" style="background-color: ${soul.color}; width: 40px; height: 40px;"></div>
+                        <div class="soul-flame" style="background-color: ${soul.color}; width: 80px; height: 80px; opacity: 0.6;"></div>
+                    </div>
+                    <div class="soul-status">状态: ${soul.status}</div>
+                    <div class="soul-frequency">频率: ${soul.frequency}</div>
+                `;
+                
+                soulGrid.appendChild(soulCard);
+            });
+        }
+
+        // 更新灵魂状态（模拟实时数据）- 修复濒死状态显示问题
+        function updateSoulStatus() {
+            const soulCards = document.querySelectorAll('.soul-card');
+            
+            soulCards.forEach((card, index) => {
+                const soul = soulData[index];
+                
+                // 跳过已逝的灵魂
+                if (soul.deceased) return;
+                
+                // 濒死状态特殊处理
+                if (soul.dying) {
+                    // 濒死状态下频率在1-15Hz之间波动
+                    const minFrequency = 1;
+                    const maxFrequency = 15;
+                    const randomFrequency = (minFrequency + Math.random() * (maxFrequency - minFrequency)).toFixed(1) + 'Hz';
+                    
+                    // 更新显示 - 确保状态显示为"濒死"
+                    card.querySelector('.soul-status').textContent = `状态: 濒死`;
+                    card.querySelector('.soul-frequency').textContent = `频率: ${randomFrequency}`;
+                    
+                    // 濒死状态下有1/20的概率恢复
+                    if (Math.random() < 0.05) { // 5%概率恢复
+                        soul.dying = false;
+                        soul.status = "稳定";
+                        card.classList.remove('soul-dying');
+                        
+                        // 恢复后频率回到正常范围
+                        const normalFrequency = (65 + Math.random() * 15).toFixed(1) + 'Hz';
+                        soul.frequency = normalFrequency;
+                    }
+                } else {
+                    // 正常状态的随机更新
+                    const statusOptions = ["稳定", "波动", "强烈波动", "平静"];
+                    let randomStatus = statusOptions[Math.floor(Math.random() * statusOptions.length)];
+                    
+                    // 生成随机频率（在基础值上下浮动）
+                    const baseFrequency = parseFloat(soul.frequency);
+                    let randomFrequency = (baseFrequency + (Math.random() - 0.5) * 2).toFixed(1);
+                    
+                    // 检查频率是否进入濒死范围
+                    if (randomFrequency <= 15 && randomFrequency >= 1) {
+                        // 进入濒死状态
+                        soul.dying = true;
+                        soul.status = "濒死";
+                        card.classList.add('soul-dying');
+                        randomStatus = "濒死";
+                    }
+                    
+                    // 更新显示
+                    card.querySelector('.soul-status').textContent = `状态: ${randomStatus}`;
+                    card.querySelector('.soul-frequency').textContent = `频率: ${randomFrequency}Hz`;
+                    
+                    // 正常状态下有1/100的概率进入濒死状态
+                    if (Math.random() < 0.01 && !soul.deceased) { // 1%概率进入濒死
+                        soul.dying = true;
+                        soul.status = "濒死";
+                        card.classList.add('soul-dying');
+                    }
+                }
+                
+                // 根据状态调整动画速度
+                const core = card.querySelector('.soul-core');
+                const flame = card.querySelector('.soul-flame');
+                
+                if (soul.status === "波动" || soul.status === "强烈波动") {
+                    core.style.animationDuration = '1.5s';
+                    flame.style.animationDuration = '2s';
+                } else if (soul.dying) {
+                    core.style.animationDuration = '3s';
+                    flame.style.animationDuration = '4s';
+                } else {
+                    core.style.animationDuration = '2s';
+                    flame.style.animationDuration = '3s';
+                }
+            });
+        }
+
+        // 搜索功能
+        function performSearch(query) {
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '';
+            
+            if (!query || query.trim() === '') {
+                searchResults.classList.remove('active');
+                return;
+            }
+            
+            const normalizedQuery = query.toLowerCase().trim();
+            
+            // 处理特殊命令
+            if (normalizedQuery === 'hello world') {
+                // HELLO WORLD彩蛋：临时最高权限
+                activateTempPermission();
+                searchResults.innerHTML = '<div class="no-results">彩蛋触发！已获得临时最高权限30分钟！</div>';
+                searchResults.classList.add('active');
+                return;
+            }
+            
+            // 搜索角色
+            const characterResults = characters.filter(character => 
+                character.name.toLowerCase().includes(normalizedQuery) || 
+                character.alias.toLowerCase().includes(normalizedQuery) ||
+                character.description.toLowerCase().includes(normalizedQuery)
+            );
+            
+            // 搜索维度
+            const dimensionResults = dimensions.filter(dimension => 
+                dimension.name.toLowerCase().includes(normalizedQuery) ||
+                dimension.description.toLowerCase().includes(normalizedQuery)
+            );
+            
+            // 显示结果
+            if (characterResults.length === 0 && dimensionResults.length === 0) {
+                searchResults.innerHTML = '<div class="no-results">未找到相关结果</div>';
+            } else {
+                // 添加角色结果
+                characterResults.forEach(character => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'search-result-item';
+                    resultItem.dataset.type = 'character';
+                    resultItem.dataset.id = character.id;
+                    
+                    resultItem.innerHTML = `
+                        <div>
+                            <span class="result-type">角色</span>
+                            <span class="result-name">${character.name}</span>
+                        </div>
+                        <div class="result-detail">${character.alias} - ${character.description.substring(0, 50)}...</div>
+                    `;
+                    
+                    resultItem.addEventListener('click', () => {
+                        // 导航到角色档案
+                        document.querySelector('.nav-item[data-content="character-archive"]').click();
+                        
+                        // 找到对应的角色卡片并点击
+                        setTimeout(() => {
+                            const characterCard = document.querySelector(`.character-card[data-character-id="${character.id}"]`);
+                            if (characterCard) {
+                                characterCard.click();
+                            }
+                        }, 100);
+                        
+                        // 关闭搜索结果
+                        searchResults.classList.remove('active');
+                        document.getElementById('searchInput').value = '';
+                    });
+                    
+                    searchResults.appendChild(resultItem);
+                });
+                
+                // 添加维度结果
+                dimensionResults.forEach(dimension => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'search-result-item';
+                    resultItem.dataset.type = 'dimension';
+                    resultItem.dataset.id = dimension.id;
+                    
+                    resultItem.innerHTML = `
+                        <div>
+                            <span class="result-type">维度</span>
+                            <span class="result-name">${dimension.name}</span>
+                        </div>
+                        <div class="result-detail">${dimension.description.substring(0, 50)}...</div>
+                    `;
+                    
+                    resultItem.addEventListener('click', () => {
+                        // 导航到维度档案
+                        document.querySelector('.nav-item[data-content="dimension-archive"]').click();
+                        
+                        // 检查权限
+                        const requiredPermission = dimensionPermissions[dimension.id];
+                        const hasPermission = checkDimensionPermission(dimension.id);
+                        
+                        if (hasPermission) {
+                            // 找到对应的维度子菜单项并点击
+                            setTimeout(() => {
+                                const dimensionItem = document.querySelector(`.sub-nav-item[data-dimension="${dimension.id}"]`);
+                                if (dimensionItem) {
+                                    dimensionItem.click();
+                                }
+                            }, 100);
+                        } else {
+                            // 显示权限不足提示
+                            setTimeout(() => {
+                                const permissionRestricted = document.getElementById('permissionRestricted');
+                                if (permissionRestricted) {
+                                    permissionRestricted.classList.add('active');
+                                }
+                            }, 100);
+                        }
+                        
+                        // 关闭搜索结果
+                        searchResults.classList.remove('active');
+                        document.getElementById('searchInput').value = '';
+                    });
+                    
+                    searchResults.appendChild(resultItem);
+                });
+            }
+            
+            searchResults.classList.add('active');
+        }
+
+        // 检查用户对维度的访问权限（修复后的函数）
+        function checkDimensionPermission(dimensionId) {
+            if (!currentUser) return false;
+            
+            const requiredPermission = dimensionPermissions[dimensionId];
+            
+            // 如果有临时权限，赋予最高权限
+            if (tempPermissionActive) {
+                return true; // 临时权限可以访问所有维度
+            }
+            
+            // 检查用户权限等级是否满足维度要求
+            // 注意：权限等级数字越小权限越高，所以需要用户权限等级 >= 维度要求权限等级
+            return currentUser.permissionLevel >= requiredPermission;
+        }
+
+        // 激活临时权限
+        function activateTempPermission() {
+            tempPermissionActive = true;
+            tempPermissionExpiry = new Date().getTime() + TEMPORARY_PERMISSION_DURATION;
+            
+            // 更新权限显示
+            updatePermissionDisplay();
+            
+            // 显示提示
+            const systemTitle = document.querySelector('.system-title');
+            if (systemTitle) {
+                const tempBadge = document.createElement('span');
+                tempBadge.className = 'permission-badge';
+                tempBadge.style.backgroundColor = 'rgba(255, 215, 0, 0.3)';
+                tempBadge.style.borderColor = 'rgba(255, 215, 0, 0.7)';
+                tempBadge.textContent = '临时最高权限';
+                tempBadge.id = 'tempPermissionBadge';
+                systemTitle.appendChild(tempBadge);
+            }
+            
+            // 30分钟后自动取消
+            setTimeout(() => {
+                deactivateTempPermission();
+            }, TEMPORARY_PERMISSION_DURATION);
+        }
+
+        // 取消临时权限
+        function deactivateTempPermission() {
+            tempPermissionActive = false;
+            tempPermissionExpiry = null;
+            
+            // 更新权限显示
+            updatePermissionDisplay();
+            
+            // 移除临时权限徽章
+            const tempBadge = document.getElementById('tempPermissionBadge');
+            if (tempBadge) {
+                tempBadge.remove();
+            }
+            
+            // 如果当前查看的是需要权限的维度，可能会被踢出
+            updateDimensionAccess();
+        }
+
+        // 更新权限显示
+        function updatePermissionDisplay() {
+            if (!currentUser) return;
+            
+            const currentUserName = document.getElementById('currentUserName');
+            const currentUserBadge = document.getElementById('currentUserBadge');
+            
+            if (currentUserName) {
+                currentUserName.textContent = currentUser.displayName;
+            }
+            
+            if (currentUserBadge) {
+                if (tempPermissionActive) {
+                    currentUserBadge.textContent = `权限: ✧ (临时)`;
+                    currentUserBadge.style.backgroundColor = 'rgba(255, 215, 0, 0.3)';
+                    currentUserBadge.style.borderColor = 'rgba(255, 215, 0, 0.7)';
+                } else {
+                    currentUserBadge.textContent = `权限: ${currentUser.permission}`;
+                    currentUserBadge.style.backgroundColor = '';
+                    currentUserBadge.style.borderColor = '';
+                }
+            }
+            
+            // 更新维度访问权限
+            updateDimensionAccess();
+        }
+
+        // 更新维度访问权限（修复后的函数）
+        function updateDimensionAccess() {
+            if (!currentUser) return;
+            
+            const subNavItems = document.querySelectorAll('.sub-nav-item');
+            const dimensionContents = document.querySelectorAll('.dimension-content');
+            const permissionRestricted = document.getElementById('permissionRestricted');
+            
+            let hasAccess = false;
+            let firstAccessibleDimension = null;
+            
+            // 隐藏所有维度内容和权限限制提示，并移除所有子菜单项的激活状态
+            dimensionContents.forEach(content => content.style.display = 'none');
+            subNavItems.forEach(item => item.classList.remove('active'));
+            if (permissionRestricted) {
+                permissionRestricted.classList.remove('active');
+            }
+            
+            // 检查每个维度的权限
+            subNavItems.forEach(item => {
+                const dimension = item.getAttribute('data-dimension');
+                const hasPermission = checkDimensionPermission(dimension);
+                
+                if (hasPermission) {
+                    item.style.display = 'block';
+                    if (!firstAccessibleDimension) {
+                        firstAccessibleDimension = dimension;
+                    }
+                    hasAccess = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // 根据是否有权限访问任何维度来显示内容
+            if (hasAccess) {
+                // 激活第一个可访问的维度
+                if (firstAccessibleDimension) {
+                    const firstItem = document.querySelector(`.sub-nav-item[data-dimension="${firstAccessibleDimension}"]`);
+                    const firstContent = document.getElementById(`${firstAccessibleDimension}-dimension`);
+                    
+                    if (firstItem) {
+                        firstItem.classList.add('active');
+                    }
+                    if (firstContent) {
+                        firstContent.style.display = 'block';
+                    }
+                }
+            } else {
+                // 没有权限访问任何维度，显示权限限制提示
+                if (permissionRestricted) {
+                    permissionRestricted.classList.add('active');
+                }
+            }
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createBinaryRain();
+            
+            const welcomeStage = document.getElementById('welcomeStage');
+            const userSelectionStage = document.getElementById('userSelectionStage');
+            const loginStage = document.getElementById('loginStage');
+            const loadingStage = document.getElementById('loadingStage');
+            const systemInterface = document.getElementById('systemInterface');
+            const osTitle = document.getElementById('osTitle');
+            const helloWorld = document.getElementById('helloWorld');
+            const loginForm = document.getElementById('loginForm');
+            const loginButton = document.getElementById('loginButton');
+            const userSelectButton = document.getElementById('userSelectButton');
+            const backToLoginButton = document.getElementById('backToLoginButton');
+            const usernameInput = document.getElementById('usernameInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const errorMessage = document.getElementById('errorMessage');
+            const dimensionSubNav = document.getElementById('dimensionSubNav');
+            const easterEgg = document.getElementById('easterEgg');
+            const customCursor = document.getElementById('customCursor');
+            const desaturateTimer = document.getElementById('desaturateTimer');
+            const heartbeatElement = document.getElementById('heartbeatElement');
+            const startButton = document.getElementById('startButton');
+            const gomokuGame = document.getElementById('gomokuGame');
+            const effectsToggle = document.getElementById('effectsToggle');
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const searchResults = document.getElementById('searchResults');
+            const tempPermissionInput = document.getElementById('tempPermissionInput');
+            const permissionKeyInput = document.getElementById('permissionKeyInput');
+            const applyPermissionKey = document.getElementById('applyPermissionKey');
+            const currentUserBadge = document.getElementById('currentUserBadge');
+            
+            // 初始化五子棋游戏
+            initGomokuGame();
+            
+            // 创建用户选择界面
+            createUserSelection();
+            
+            // 创建角色档案界面
+            createCharacterArchive();
+            
+            // 创建灵魂频率监测界面
+            createSoulFrequencyMonitoring();
+            
+            // 特效切换按钮事件
+            if (effectsToggle) {
+                effectsToggle.addEventListener('click', toggleEffectsMode);
+            }
+            
+            // 自定义光标
+            let isDesktop = !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isDesktop) {
+                customCursor.style.display = 'block';
+                
+                document.addEventListener('mousemove', function(e) {
+                    customCursor.style.left = e.clientX + 'px';
+                    customCursor.style.top = e.clientY + 'px';
+                });
+                
+                document.addEventListener('mousedown', function() {
+                    customCursor.style.transform = 'scale(0.8)';
+                });
+                
+                document.addEventListener('mouseup', function() {
+                    customCursor.style.transform = 'scale(1)';
+                });
+            }
+            
+            // 导航菜单事件
+            const navItems = document.querySelectorAll('.nav-item');
+            const contentSections = document.querySelectorAll('.content-area > .content-section');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // 更新活动菜单项
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 显示对应内容
+                    const contentId = this.getAttribute('data-content') + '-content';
+                    contentSections.forEach(section => {
+                        section.style.display = section.id === contentId ? 'block' : 'none';
+                    });
+                    
+                    // 处理维度档案子菜单
+                    if (this.getAttribute('data-content') === 'dimension-archive') {
+                        dimensionSubNav.classList.add('active');
+                    } else {
+                        dimensionSubNav.classList.remove('active');
+                    }
+                    
+                    // 重置内容区域滚动位置
+                    document.querySelector('.content-area').scrollTop = 0;
+                    
+                    // 关闭搜索结果
+                    searchResults.classList.remove('active');
+                });
+            });
+            
+            // 维度子菜单事件（修复后的权限检查）
+            const subNavItems = document.querySelectorAll('.sub-nav-item');
+            const dimensionContents = document.querySelectorAll('.dimension-content');
+            
+            subNavItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // 检查权限
+                    const dimension = this.getAttribute('data-dimension');
+                    const hasPermission = checkDimensionPermission(dimension);
+                    
+                    if (hasPermission) {
+                        // 权限足够，更新活动子菜单项
+                        subNavItems.forEach(nav => nav.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // 显示对应维度内容
+                        const dimensionId = this.getAttribute('data-dimension') + '-dimension';
+                        dimensionContents.forEach(content => {
+                            content.style.display = content.id === dimensionId ? 'block' : 'none';
+                        });
+                        
+                        // 隐藏权限限制提示
+                        const permissionRestricted = document.getElementById('permissionRestricted');
+                        if (permissionRestricted) {
+                            permissionRestricted.classList.remove('active');
+                        }
+                        
+                        // 重置维度内容滚动位置
+                        document.querySelector('.content-area').scrollTop = 0;
+                    } else {
+                        // 权限不足，显示提示
+                        const permissionRestricted = document.getElementById('permissionRestricted');
+                        if (permissionRestricted) {
+                            permissionRestricted.classList.add('active');
+                        }
+                        
+                        // 隐藏所有维度内容
+                        dimensionContents.forEach(content => content.style.display = 'none');
+                    }
+                });
+            });
+            
+            // 搜索功能事件
+            searchInput.addEventListener('input', function() {
+                performSearch(this.value);
+            });
+            
+            searchButton.addEventListener('click', function() {
+                performSearch(searchInput.value);
+            });
+            
+            // 点击页面其他地方关闭搜索结果
+            document.addEventListener('click', function(e) {
+                if (!searchResults.contains(e.target) && e.target !== searchInput && e.target !== searchButton) {
+                    searchResults.classList.remove('active');
+                }
+            });
+            
+            // 临时权限输入框
+            let tempPermissionInputVisible = false;
+            
+            currentUserBadge.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                if (tempPermissionInputVisible) {
+                    tempPermissionInput.style.display = 'none';
+                } else {
+                    tempPermissionInput.style.display = 'block';
+                    // 定位在徽章下方
+                    const rect = this.getBoundingClientRect();
+                    tempPermissionInput.style.left = `${rect.left}px`;
+                    tempPermissionInput.style.top = `${rect.bottom + 5}px`;
+                }
+                
+                tempPermissionInputVisible = !tempPermissionInputVisible;
+            });
+            
+            applyPermissionKey.addEventListener('click', function() {
+                const key = permissionKeyInput.value.trim();
+                if (key === TEMPORARY_PERMISSION_KEY) {
+                    activateTempPermission();
+                    tempPermissionInput.style.display = 'none';
+                    tempPermissionInputVisible = false;
+                    permissionKeyInput.value = '';
+                } else {
+                    alert('权限密钥错误！');
+                }
+            });
+            
+            // 点击页面其他地方关闭临时权限输入框
+            document.addEventListener('click', function() {
+                if (tempPermissionInputVisible) {
+                    tempPermissionInput.style.display = 'none';
+                    tempPermissionInputVisible = false;
+                }
+            });
+            
+            // 特效事件
+            let effectsTimeout;
+            const effectsDelay = 50; // 特效延迟（毫秒）
+            
+            // 鼠标移动时生成特效
+            document.addEventListener('mousemove', function(e) {
+                clearTimeout(effectsTimeout);
+                effectsTimeout = setTimeout(() => {
+                    createEffect(e.clientX, e.clientY);
+                }, effectsDelay);
+            });
+            
+            // 鼠标点击时生成更多特效
+            document.addEventListener('mousedown', function(e) {
+                createEffect(e.clientX, e.clientY, 5, true);
+            });
+            
+            // 触摸滑动时生成特效
+            document.addEventListener('touchmove', function(e) {
+                clearTimeout(effectsTimeout);
+                effectsTimeout = setTimeout(() => {
+                    const touch = e.touches[0];
+                    createEffect(touch.clientX, touch.clientY);
+                }, effectsDelay);
+            });
+            
+            // 触摸点击时生成更多特效
+            document.addEventListener('touchstart', function(e) {
+                const touch = e.touches[0];
+                createEffect(touch.clientX, touch.clientY, 5, true);
+            });
+            
+            // 自动启动序列
+            let autoStarted = false;
+            
+            function startBootSequence() {
+                if (autoStarted) return;
+                autoStarted = true;
+                
+                setTimeout(async () => {
+                    // 第一阶段：显示OS标题
+                    await typeWriter(osTitle, 'EMBERSTAR OS');
+                    
+                    // 第二阶段：显示HELLO WORLD
+                    await typeWriter(helloWorld, 'HELLO WORLD!');
+                    
+                    // 等待2秒后切换到登录界面
+                    setTimeout(async () => {
+                        await switchStage(welcomeStage, loginStage);
+                        
+                        // 为登录表单添加动画
+                        setTimeout(() => {
+                            loginForm.classList.add('active');
+                            
+                            // 显示登录按钮
+                            setTimeout(() => {
+                                loginButton.classList.add('active');
+                                userSelectButton.classList.add('active');
+                            }, 500);
+                        }, 500);
+                    }, 2000);
+                }, 1000);
+            }
+            
+            // 触摸/点击开始启动序列
+            document.addEventListener('click', startBootSequence);
+            document.addEventListener('touchstart', startBootSequence);
+            
+            // 登录按钮点击事件
+            loginButton.addEventListener('click', async () => {
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+                
+                // 验证登录信息
+                const foundUser = users.find(user => 
+                    user.username === username && user.password === password
+                );
+                
+                if (foundUser) {
+                    // 登录成功
+                    currentUser = foundUser;
+                    errorMessage.style.display = 'none';
+                    await switchStage(loginStage, loadingStage);
+                    
+                    // 模拟进度条加载
+                    await simulateProgress();
+                    
+                    // 切换到系统界面
+                    systemInterface.classList.add('active');
+                    
+                    // 更新权限显示
+                    updatePermissionDisplay();
+                    
+                    // 开始更新时间
+                    updateSystemTime();
+                    setInterval(updateSystemTime, 1000);
+                } else {
+                    // 登录失败
+                    errorMessage.style.display = 'block';
+                    usernameInput.style.borderColor = '#ff6666';
+                    passwordInput.style.borderColor = '#ff6666';
+                    
+                    // 重置输入框样式
+                    setTimeout(() => {
+                        usernameInput.style.borderColor = '#00ffff';
+                        passwordInput.style.borderColor = '#00ffff';
+                    }, 2000);
+                }
+            });
+            
+            // 用户选择按钮点击事件
+            userSelectButton.addEventListener('click', async () => {
+                await switchStage(loginStage, userSelectionStage);
+            });
+            
+            // 返回登录按钮点击事件
+            backToLoginButton.addEventListener('click', async () => {
+                await switchStage(userSelectionStage, loginStage);
+            });
+            
+            // 彩蛋：跳过登录
+            easterEgg.addEventListener('click', async () => {
+                // 跳过登录阶段，直接进入加载阶段
+                currentUser = users[0]; // 使用星荧账户
+                await switchStage(loginStage, loadingStage);
+                
+                // 模拟进度条加载
+                await simulateProgress();
+                
+                // 切换到系统界面
+                systemInterface.classList.add('active');
+                
+                // 更新权限显示
+                updatePermissionDisplay();
+                
+                // 开始更新时间
+                updateSystemTime();
+                setInterval(updateSystemTime, 1000);
+            });
+            
+            // 彩蛋：点击HELLO WORLD跳过登录
+            helloWorld.addEventListener('click', async () => {
+                // 直接跳过所有阶段，进入系统界面
+                currentUser = users[0]; // 使用星荧账户
+                welcomeStage.classList.remove('active');
+                loginStage.classList.remove('active');
+                loadingStage.classList.remove('active');
+                
+                // 切换到系统界面
+                systemInterface.classList.add('active');
+                
+                // 更新权限显示
+                updatePermissionDisplay();
+                
+                // 开始更新时间
+                updateSystemTime();
+                setInterval(updateSystemTime, 1000);
+            });
+            
+            // 彩蛋：点击最后心跳触发褪色效果
+            heartbeatElement.addEventListener('click', function() {
+                // 检查是否已经在褪色状态
+                if (document.body.classList.contains('desaturate')) return;
+                
+                // 添加褪色类
+                document.body.classList.add('desaturate');
+                
+                // 显示倒计时
+                desaturateTimer.style.display = 'block';
+                
+                let timeLeft = 120; // 延长到120秒
+                desaturateTimer.textContent = timeLeft;
+                
+                // 倒计时
+                const countdown = setInterval(() => {
+                    timeLeft--;
+                    desaturateTimer.textContent = timeLeft;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(countdown);
+                        document.body.classList.remove('desaturate');
+                        desaturateTimer.style.display = 'none';
+                    }
+                }, 1000);
+            });
+            
+            // 开始按钮点击事件 - 打开五子棋游戏
+            startButton.addEventListener('click', function() {
+                gomokuGame.classList.add('active');
+            });
+            
+            // 添加触摸事件支持
+            loginButton.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                this.click();
+            });
+            
+            userSelectButton.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                this.click();
+            });
+            
+            // 添加终端闪烁效果
+            setInterval(() => {
+                document.body.style.backgroundColor = Math.random() > 0.95 ? '#0a0a18' : '#0a0a12';
+            }, 100);
+            
+            // 自动更新灵魂状态（每10秒）
+            setInterval(updateSoulStatus, 10000);
+        });
+    </script>
+</body>
+</html>
