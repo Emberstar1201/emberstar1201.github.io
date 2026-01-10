@@ -21,7 +21,7 @@
     化身: '/assets/avatar/emberstar.jpg'
   },
   {
-    身份标识: "Lumirise",
+    身份标识: "lumirise",
     姓名: "璃梦",
     别名: "Lumirise",
     年龄: "16",
