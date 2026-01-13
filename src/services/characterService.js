@@ -261,7 +261,7 @@ const characters = [
     avatar: "/assets/avatar/Tanjiu.png"
   },
   {
-    id: "ananahita",
+    id: "anahita",
     name: "余娜媞思",
     alias: "Anahita / 阿娜希塔",
     age: "12000岁(人类时期约12岁)",
@@ -278,7 +278,7 @@ const characters = [
     description: "本质：\"披神袍之人\"------虽为神明，内核始终保留人类时期的共情与韧性。人类时期(阿娜希塔)：生于距今约2500万年的原始流域文明，名字\"阿娜希塔\"意为\"纯洁之水\"。身患不治之症，濒死时被始源与终末之神发现(经过她父母同意的)，带入神界升格为见习天使。因意志坚定被选为裁决之神候选，历经漫长试炼后正式继任。",
     motto: "从来没有真正公正的裁决，也从来没有真正的正义，这些也只是行走于规则的蛀虫而已",
     status: "alive",
-    avatar: "⚖️"
+    avatar: "/assets/avatar/anahita.png"
   }
 ];
 
