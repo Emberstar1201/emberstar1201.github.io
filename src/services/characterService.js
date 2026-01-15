@@ -38,7 +38,7 @@ const characters = [
     description: "被人畏惧地称作『瘟疫魔女』，但真实愿望只是想做普通女孩。同时具备部分死亡之神和毁灭之神的权能。在被控制期间犯下诸多罪孽，虽深知难以被原谅，仍坚持用修复后的能力帮助他人赎罪。在余娜媞思的审判中，因星荧的证言和自身悔过表现获得宽大处理。",
     motto: "笼中的羽翼终将划破长夜------以新生为刃，斩断枷锁。",
     status: "alive",
-    avatar: '/assets/avatar/lumirise.jpg'
+    avatar: '/assets/avatar/lumirise.png'
   },
   {
     id: "cielune",
@@ -58,7 +58,7 @@ const characters = [
     description: "由生命之神-希塔娜创造的『神之子嗣』，虽非星荧血亲却情同手足。肩负维系生死平衡的职责，但不受任何神明操控。能同时感知方圆五公里内所有生命的诞生与消亡。",
     motto: "生命的天平无需倾斜，凋零与绽放皆是永恒的回响。",
     status: "alive",
-    avatar: '/assets/avatar/cielune.jpg'
+    avatar: '/assets/avatar/cielune.png'
   },
   {
     id: "seren",
