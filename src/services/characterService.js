@@ -98,7 +98,7 @@ const characters = [
     description: "原为贵族大小姐(仁尹)的普通朋友，在父母去世后与妹妹陌心相依为命。妹妹被村民献祭给邪神后，在绝望之际遇见星荧，同意将濒死的妹妹改造为类人偶存在。现与妹妹一起在净土生活。",
     motto: "即使世界布满荆棘，我也会为身后之人踏出一条路。",
     status: "alive",
-    avatar: "assets/avatar/selaine.png"
+    avatar: "/assets/avatar/selaine.png"
   },
   {
     id: "qizixuan",
