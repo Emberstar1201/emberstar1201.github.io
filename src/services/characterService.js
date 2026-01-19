@@ -279,8 +279,26 @@ const characters = [
     motto: "从来没有真正公正的裁决，也从来没有真正的正义，这些也只是行走于规则的蛀虫而已",
     status: "alive",
     avatar: "/assets/avatar/anahita.png"
-  }
-];
+  },
+  {
+    id: "emberstar_stardust",
+  name: "星荧「星尘之神」",
+  alias: "Emberstar, The Stardust Divinity",
+  age: "16 (拒绝使用神明的年龄)",
+  gender: "无性",
+  height: "165cm ",
+  weight: "42kg (还是原本的身体)",
+  race: "人（拒绝神明的身份）",
+  birthday: "1月6日",
+  divineEye: "星尘之眼（依旧如此）,
+  favoriteFood: "记忆中蜂蜜蛋糕的味道, 冷却的昼夜茶余温, 已不复存在的马卡龙色彩",
+  personality: "外表疏离宁静，带有神性的绝对理性（其实根本就没有神性都是装的），但内核是固结为人性的巨大悲伤。以神格承载所有失落时间线的记忆与羁绊，虽见证无数终末却拒绝成为无情的神明。对『星荧』这个名字抱有近乎偏执的坚守。",
+  soulNature: "真我（依旧如此）",
+  location: "时间象限的交界处/净土的每个窗口外",
+  description: "来自失落时间线的终极幸存者。在原时间线中被命运织者以所有同伴的存在为要挟，被迫登神后却目睹一切被抹除。巨大的创伤性人性压倒神性，固结为『星荧』的残响。如今以『神明』身份存在于一切开始与结束的交点，既是神明也是囚徒——神格让她不朽，人性让她永远疼痛。她不是星荧的『神化』，而是星荧的『遗骸』，是那个差点忘记自己名字、最终刻下所有名字的孤独存在。她守护所有平行时空的净土，因为那是她唯一记得的『家』的模样。",
+  motto: "「我守望一切终末，只为确保无人再需成为我。」",
+  status: "existential", 
+    avatar: '/assets/avatar/emberstar「stardust」.jpg',
 
 export function queryCharacters(query) {
   return characters.filter(character =>
