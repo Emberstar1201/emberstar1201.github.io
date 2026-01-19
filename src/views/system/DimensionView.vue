@@ -78,7 +78,7 @@ const requiredPermissionLevel = computed(() => {
       <div class="content">
         <!-- 权限限制提示 -->
         <div v-if="!hasPermission" class="permission-restricted" id="permissionRestricted">
-          <div class="restricted-icon"><img src="assets/cover/Insufficient Permission.png" alt="权限不足"></div>
+          <div class="restricted-icon"><img src="/assets/cover/Insufficient Permission.png" alt="权限不足"></div>
           <div class="restricted-message">权限不足</div>
           <div class="restricted-detail">
             您当前的权限等级 ({{ userPermissionLevel }}) 无法访问此维度档案。<br>
