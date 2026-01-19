@@ -299,8 +299,9 @@ const characters = [
   motto: "「我守望一切终末，只为确保无人再需成为我。」",
   status: "existential", 
     avatar: '/assets/avatar/emberstar「stardust」.jpg',
-  ]
-};
+  }
+];
+
 
 export function queryCharacters(query) {
   return characters.filter(character =>
