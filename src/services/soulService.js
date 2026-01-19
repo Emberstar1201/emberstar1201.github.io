@@ -103,8 +103,8 @@ const soulData = [
     frequency: "72.4Hz",
     deceased: false,
     dying: false
-  ]
- };
+    }
+ ];
 
 export function getAllSouls() {
   return soulData;
