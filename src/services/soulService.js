@@ -95,8 +95,16 @@ const soulData = [
     frequency: "71.2Hz",
     deceased: false,
     dying: false
-  }
-];
+  },
+  {
+    name: "星荧「星尘之神」",
+    color: "#ffffff",
+    status: "稳定",
+    frequency: "72.4Hz",
+    deceased: false,
+    dying: false
+  ]
+ };
 
 export function getAllSouls() {
   return soulData;
