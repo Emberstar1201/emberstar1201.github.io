@@ -1,4 +1,3 @@
-// 灵魂数据定义 - 更新濒死状态
 const soulData = [
   {
     name: "星荧",
@@ -97,7 +96,7 @@ const soulData = [
     dying: false
   }
 ];
-    
+
 export function getAllSouls() {
   return soulData;
 }
