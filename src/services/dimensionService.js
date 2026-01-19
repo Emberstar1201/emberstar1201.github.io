@@ -4,7 +4,7 @@ export class DimensionService {
     // 维度权限要求
     this.dimensionPermissions = {
       "pureland": 7,
-      "cycle": 7,
+      "cycle": 6,
       "void": 6,
       "dream": 6
     };
