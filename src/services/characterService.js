@@ -18,7 +18,7 @@ const characters = [
     description: "作为最后被创造的『神之子嗣』，星荧是『始源』与『终末』双神自裁前留下的终极造物。其存在本身即是矛盾：同时承载创造与毁灭的权能，四重权能的性质和解析充满矛盾性。神之眼永远保持开启状态，体内魔法能量上限被始源之神刻意限制(但有99.9%的减耗)。成功突破虚无困境，觉醒独有『真我』权能，同时也是『Emberstar OS』最高权限持有者。",
     motto: "即便一切都是虚无，我也会去寻找那一抹色彩",
     status: "alive",
-    avatar: '/assets/avatar/emberstar.jpg'
+    avatar: '/assets/avatar/emberstar.png'
   },
   {
     id: "lumirise",
@@ -198,7 +198,7 @@ const characters = [
     description: "曾经因为瘟疫魔女带来的灾难让她失去了父母，后面因为一场大火夺走了她的双眼，只能依靠自身的听觉和盲杖辅助生活。目前在一家面包店干着服务员工作，虽然眼睛看不见东西，但后面根据练习也能准确分辨得出面包的种类了。",
     motto: "黑暗并非虚无------它只是光明的另一种语言。",
     status: "alive",
-    avatar: "/assets/avatar/lumiere.jpg"
+    avatar: "/assets/avatar/lumiere.png"
   },
   {
     id: "qiyubai",
@@ -238,7 +238,7 @@ const characters = [
     description: "被卡莉斯塔教会选中的第13任\"圣女\"，拥有特殊体质------能成为神明降临的容器，代价是灵魂被反复撕裂。历任圣女皆因灵魂枯竭而亡，唯独银铃在彻底崩溃前，被星荧以『生命琼露』与『真我』权能强行挽留。如今，她带着残破的灵魂与模糊的记忆定居净土，成为\"笼中鸟破笼\"的又一象征。",
     motto: "我本可忍受黑暗......如果\"她\"(星荧和久夜)不曾带着光闯进来。",
     status: "alive",
-    avatar: "/assets/avatar/vanya.jpg"
+    avatar: "/assets/avatar/vanya.png"
   },
   {
     id: "tanjiu",
