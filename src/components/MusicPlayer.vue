@@ -62,15 +62,14 @@ const songs = ref([
     src:'/assets/audios/阿哲的音乐信箱 - 董东咚 (Daylight).mp3',
     cover:'/assets/cover/daylight.webp',
   },
-    {
+  {
       id:7,
     title:'凌音天羽 - 【崩坏学园2】西琳角色歌「幸福魔法」',
     artist:'崩坏学园2',
     src:'/assets/audios/凌音天羽 - 【崩坏学园2】西琳角色歌「幸福魔法」.mp3',
     cover:'/assets/cover/xilin.webp',
-    },
-    {
-    
+  },
+  {
     id: 8,
     title: '春日影',
     artist: 'CRYCHIC',
