@@ -42,7 +42,36 @@ const songs = ref([
     cover: '/assets/cover/%E6%84%BF%E6%88%B4%E8%8D%A3%E5%85%89%E5%9D%A0%E5%85%A5%E5%A4%A9%E6%B8%8A.webp'
   },
   {
-    id: 4,
+    id:4,
+    title:'dreamworld',
+    artist:'',
+    src:'/assets/audios/dreamworld.ogg',
+    cover:'/assets/cover/dreamworld.webp',
+  },
+  {
+    id:5,
+    title:'sweetdream',
+    artist:'',
+    src:'/assets/audios/sweetdream.ogg',
+    cover:'/assets/cover/sweetdream.webp',
+  },
+  {
+    id:6,
+    title:'daylight',
+    artist:'',
+    src:'/assets/audios/阿哲的音乐信箱 - 董东咚 (Daylight).mp3',
+    cover:'/assets/cover/daylight.webp',
+  },
+    {
+      id:7,
+    title:'凌音天羽 - 【崩坏学园2】西琳角色歌「幸福魔法」',
+    artist:'崩坏学园2',
+    src:'/assets/audios/凌音天羽 - 【崩坏学园2】西琳角色歌「幸福魔法」.mp3',
+    cover:'/assets/cover/xilin.webp',
+    },
+    {
+    
+    id: 8,
     title: '春日影',
     artist: 'CRYCHIC',
     src: '/assets/audios/CRYCHIC - 春日影_H.ogg',
