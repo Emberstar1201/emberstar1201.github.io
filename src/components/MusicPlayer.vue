@@ -52,7 +52,7 @@ const songs = ref([
     id:5,
     title:'sweetdream',
     artist:'',
-    src:'/assets/audios/Sweetdream.ogg',
+    src:'/assets/audios/sweetdream.ogg',
     cover:'/assets/cover/sweetdream.webp',
   },
   {
