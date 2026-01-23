@@ -80,7 +80,7 @@ const songs = ref([
   id: 9,
     title: 'komorebi',
     artist: '谷岡久美',
-    src: '/assets/audios/komorebi.mp3',
+    src: '/assets/audios/Komorebi.mp3',
     cover: '/assets/cover/chenxi.webp'  
   }
 ]); 
