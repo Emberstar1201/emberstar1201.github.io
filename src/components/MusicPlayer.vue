@@ -75,9 +75,16 @@ const songs = ref([
     artist: 'CRYCHIC',
     src: '/assets/audios/CRYCHIC - 春日影_H.ogg',
     cover: '/assets/cover/春日影.webp'
+  },
+  {
+  id: 9,
+    title: 'komorebi',
+    artist: '谷岡久美',
+    src: '/assets/audios/komorebi.mp3',
+    cover: '/assets/cover/chenxi.webp'  
   }
-]);
-
+]); 
+  
 const currentSongIndex = ref(0);
 const currentSong = computed(() => songs.value[currentSongIndex.value]);
 
