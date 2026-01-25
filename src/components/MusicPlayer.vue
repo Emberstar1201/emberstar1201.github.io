@@ -25,7 +25,7 @@ const songs = ref([
     title: 'Eutopia',
     artist: 'Maku',
     src: '/assets/audios/Eutopia.mp3',
-    cover: 'https://picsum.photos/seed/eutopia/150/150'
+    cover: '/assets/cover/eutopia.webp'
   },
   {
     id: 2,
@@ -59,7 +59,7 @@ const songs = ref([
     id:6,
     title:'daylight',
     artist:'',
-    src:'/assets/audios/阿哲的音乐信箱 - 董东咚 (Daylight).mp3',
+    src:'/assets/audios/Daylight.mp3',
     cover:'/assets/cover/daylight.webp',
   },
   {
@@ -88,7 +88,7 @@ const songs = ref([
     title: 'FREE lucky',
     artist: '',
     src: '/assets/audios/FuGa pang-【FREE】lucky.mp3',
-    cover: '/assets/cover/FREE lucky.webp'
+    cover: '/assets/cover/lucky.webp'
   },
   {
   id: 11,
@@ -96,8 +96,38 @@ const songs = ref([
     artist: '',
     src: '/assets/audios/WOW Sound - Carousel.mp3',
     cover: '/assets/cover/fenjing.webp'  
+  },
+  {
+    id: 12,
+    title: 'ありがとう',
+    artist: 'KOKIA',
+    src: '/assets/audios/ありがとう.mp3',
+    cover: '/assets/cover/ありがとう.webp'
+  },
+  {
+  id: 13,
+    title: 'The Seed Of Dreams',
+    artist: '幻塔',
+    src: '/assets/audios/The Seed Of Dreams.mp3',
+    cover: '/assets/cover/The Seed Of Dreams.webp'  
+  }，
+  {
+    
+id: 14,
+    title: 'Sacred Play Secret place（有声版）',
+    artist: '',
+    src: '/assets/audios/Sacred Play Secret place（有声版）.mp3',
+    cover:'/assets/cover/yihan.webp',
+  },
+{
+  id: 15,
+    title: 'iberomok',
+    artist: '路灰气球',
+    src: '/assets/audios/iberomok.mp3',
+    cover:'/assets/cover/iberomok.webp',
   }
-]); 
+  ]);
+    
  
 const currentSongIndex = ref(0);
 const currentSong = computed(() => songs.value[currentSongIndex.value]);
