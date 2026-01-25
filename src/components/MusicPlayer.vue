@@ -123,7 +123,7 @@ const songs = ref([
         title: 'iberomok',
         artist: '路灰气球',
         src: '/assets/audios/iberomok.mp3',
-        cover: '/assets/cover/iberomok.webp
+        cover: '/assets/cover/iberomok.webp'
   }
   ]);
      
