@@ -115,7 +115,7 @@ const songs = ref([
 id: 14,
     title: 'Sacred Play Secret place（有声版）',
     artist: '',
-    src: '/assets/audios/Sacred Play Secret place（有声版）.mp3',
+    src: '/assets/audios/sacred Play Secret place（有声版）.mp3',
     cover:'/assets/cover/yihan.webp'
   },
 {
