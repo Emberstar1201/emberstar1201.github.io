@@ -99,7 +99,7 @@ const songs = ref([
   },
   {
     id: 12,
-    title: 'ありがとう',
+    title: '谢谢',
     artist: 'KOKIA',
     src: '/assets/audios/ありがとう.mp3',
     cover: '/assets/cover/ありがとう.webp'
@@ -115,7 +115,7 @@ const songs = ref([
         id: 14,
         title: 'Sacred Play Secret Place',
         artist: '',
-        src: '/assets/audios/sacred Play Secret Place（有声版）.mp3',
+        src: '/assets/audios/sacred play secret place.mp3',
         cover: '/assets/cover/yihan.webp'
     },
     {
