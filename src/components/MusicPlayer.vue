@@ -105,25 +105,25 @@ const songs = ref([
     cover: '/assets/cover/ありがとう.webp'
   },
   {
-  id: 13,
-    title: 'The Seed Of Dreams',
-    artist: '幻塔',
-    src: '/assets/audios/The Seed Of Dreams.mp3',
-    cover: '/assets/cover/The Seed Of Dreams.webp'  
-  }，
-  {    
-id: 14,
-    title: 'Sacred Play Secret place（有声版）',
-    artist: '',
-    src: '/assets/audios/sacred Play Secret place（有声版）.mp3',
-    cover:'/assets/cover/yihan.webp'
-  },
-{
-  id: 15,
-    title: 'iberomok',
-    artist: '路灰气球',
-    src: '/assets/audios/iberomok.mp3',
-    cover:'/assets/cover/iberomok.webp'
+        id: 13,
+        title: 'The Seed Of Dreams',
+        artist: '幻塔',
+        src: '/assets/audios/The Seed Of Dreams.mp3', // 假设扩展名
+        cover: '/assets/cover/The Seed Of Dreams.webp' // 假设扩展名
+    },
+    {
+        id: 14,
+        title: 'Sacred Play Secret Place',
+        artist: '',
+        src: '/assets/audios/sacred Play Secret Place（有声版）.mp3',
+        cover: '/assets/cover/yihan.webp'
+    },
+    {
+        id: 15,
+        title: 'iberomok',
+        artist: '路灰气球',
+        src: '/assets/audios/iberomok.mp3',
+        cover: '/assets/cover/iberomok.webp
   }
   ]);
      
