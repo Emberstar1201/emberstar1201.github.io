@@ -82,9 +82,23 @@ const songs = ref([
     artist: '谷岡久美',
     src: '/assets/audios/Komorebi.mp3',
     cover: '/assets/cover/chenxi.webp'  
+  },
+    {
+      id: 10,
+    title: 'FREE lucky',
+    artist: '',
+    src: '/assets/audios/FuGa pang-【FREE】lucky.mp3',
+    cover: '/assets/cover/FREE lucky.webp'
+  },
+  {
+  id: 11,
+    title: 'WOW Sound - Carousel',
+    artist: '',
+    src: '/assets/audios/WOW Sound - Carousel.mp3',
+    cover: '/assets/cover/hudie.webp'  
   }
 ]); 
-  
+ 
 const currentSongIndex = ref(0);
 const currentSong = computed(() => songs.value[currentSongIndex.value]);
 
