@@ -32,7 +32,7 @@ const songs = ref([
     title: 'Sacred Play Secret place',
     artist: '',
     src: '/assets/audios/Sacred Play Secret place.mp3',
-    cover: 'https://picsum.photos/seed/pastglories/150/150'
+    cover:'/assets/cover/yihan.webp',
   },
   {
     id: 3,
@@ -95,7 +95,7 @@ const songs = ref([
     title: 'WOW Sound - Carousel',
     artist: '',
     src: '/assets/audios/WOW Sound - Carousel.mp3',
-    cover: '/assets/cover/hudie.webp'  
+    cover: '/assets/cover/fenjing.webp'  
   }
 ]); 
  
