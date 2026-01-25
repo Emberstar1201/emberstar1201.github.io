@@ -88,7 +88,7 @@ const songs = ref([
     title: 'FREE lucky',
     artist: '',
     src: '/assets/audios/FuGa pang-【FREE】lucky.mp3',
-    cover: '/assets/cover/lucky.webp'
+    cover: '/assets/cover/Lucky.webp'
   },
   {
   id: 11,
@@ -111,24 +111,22 @@ const songs = ref([
     src: '/assets/audios/The Seed Of Dreams.mp3',
     cover: '/assets/cover/The Seed Of Dreams.webp'  
   }，
-  {
-    
+  {    
 id: 14,
     title: 'Sacred Play Secret place（有声版）',
     artist: '',
     src: '/assets/audios/Sacred Play Secret place（有声版）.mp3',
-    cover:'/assets/cover/yihan.webp',
+    cover:'/assets/cover/yihan.webp'
   },
 {
   id: 15,
     title: 'iberomok',
     artist: '路灰气球',
     src: '/assets/audios/iberomok.mp3',
-    cover:'/assets/cover/iberomok.webp',
+    cover:'/assets/cover/iberomok.webp'
   }
   ]);
-    
- 
+     
 const currentSongIndex = ref(0);
 const currentSong = computed(() => songs.value[currentSongIndex.value]);
 
