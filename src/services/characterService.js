@@ -78,7 +78,7 @@ const characters = [
     description: "代号 ST-0715的实验体，是星荧在探索「生命的第一因」时意外创造的唯一成功人偶。与其他实验体不同，久夜并非依靠技术或魔法强行赋予意识，而是因戚紫涵的灵魂碎片作为\"媒介\"，在虚无与存在的夹缝中自发诞生了\"自我\"------这是连星荧都未能预料的奇迹。",
     motto: "她的愿望，我的选择------两颗心跳同频，却跳动着独属于'我'的旋律。",
     status: "alive",
-    avatar: '/assets/avatar/seren.png'
+    avatar: '/assets/avatar/seren.webp'
   },
   {
     id: "selaine",
