@@ -118,7 +118,7 @@ const characters = [
     description: "原为人类，在一所教堂实验室被神父转化为吸血鬼。虽未失去人性，却因杀害妹妹的罪孽不断自我否定。被星荧与久夜(体内有紫涵灵魂)救赎后，折断象征吸血鬼身份的十字架项链，随众人前往净土。在净土定居后，主动担任夜间巡逻，以血族之力守护他人，试图弥补罪孽。",
     motto: "月光下的玫瑰终将凋零------但刺尖上悬挂的，永远是我未能流尽的泪水。",
     status: "deceased",
-    avatar: "/assets/avatar/qizixuan.jpg"
+    avatar: "/assets/avatar/qizixuan.webp"
   },
   {
     id: "lumina",
