@@ -18,7 +18,7 @@ const characters = [
     description: "作为最后被创造的『神之子嗣』，星荧是『始源』与『终末』双神自裁前留下的终极造物。其存在本身即是矛盾：同时承载创造与毁灭的权能，四重权能的性质和解析充满矛盾性。神之眼永远保持开启状态，体内魔法能量上限被始源之神刻意限制(但有99.9%的减耗)。成功突破虚无困境，觉醒独有『真我』权能，同时也是『Emberstar OS』最高权限持有者。",
     motto: "即便一切都是虚无，我也会去寻找那一抹色彩",
     status: "alive",
-    avatar: '/assets/avatar/emberstar.png'
+    avatar: '/assets/avatar/emberstar.webp'
   },
   {
     id: "lumirise",
@@ -36,9 +36,9 @@ const characters = [
     soulNature: "笼中之鸟，终将飞翔",
     location: "净土",
     description: "被人畏惧地称作『瘟疫魔女』，但真实愿望只是想做普通女孩。同时具备部分死亡之神和毁灭之神的权能。在被控制期间犯下诸多罪孽，虽深知难以被原谅，仍坚持用修复后的能力帮助他人赎罪。在余娜媞思的审判中，因星荧的证言和自身悔过表现获得宽大处理。",
-    motto: "笼中的羽翼终将划破长夜------以新生为刃，斩断枷锁。",
+    motto: "笼中的羽翼终将划破长夜——以新生为刃，斩断枷锁。",
     status: "alive",
-    avatar: '/assets/avatar/lumirise.png'
+    avatar: '/assets/avatar/lumirise.webp'
   },
   {
     id: "cielune",
@@ -58,7 +58,7 @@ const characters = [
     description: "由生命之神-希塔娜创造的『神之子嗣』，虽非星荧血亲却情同手足。肩负维系生死平衡的职责，但不受任何神明操控。能同时感知方圆五公里内所有生命的诞生与消亡。",
     motto: "生命的天平无需倾斜，凋零与绽放皆是永恒的回响。",
     status: "alive",
-    avatar: '/assets/avatar/cielune.png'
+    avatar: '/assets/avatar/cielune.webp'
   },
   {
     id: "seren",
@@ -138,7 +138,7 @@ const characters = [
     description: "被村民献祭给邪神的牺牲品，濒死时由星荧改造为类人偶存在。保留人类基本生理需求，但具有部分人偶特性。左肩留有献祭仪式的荆棘状烙印。因为全身上下的经脉被那些村民挑断，星荧用了很久的时间才勉强将那些经脉重新缝合好。",
     motto: "冰冷的皮肤下，依然是温暖的血肉；冰冷的仪式之后，我仍能感受姐姐的拥抱。",
     status: "alive",
-    avatar: "/assets/avatar/lumina.png"
+    avatar: "/assets/avatar/lumina.webp"
   },
   {
     id: "etherealvelos",
@@ -158,7 +158,7 @@ const characters = [
     description: "始源之神创造的梦境管理者，长期居于梦境夹缝中的「回廊庭园」。可自由调整梦境中的形态(曾以男性形象引导迷途者)，现实世界则固定为女性形态。",
     motto: "真实与幻梦的界限，不过是我书页的正反两面。",
     status: "alive",
-    avatar: "/assets/avatar/etherealvelos.jpg"
+    avatar: "/assets/avatar/etherealvelos.webp"
   },
   {
     id: "reyna",
@@ -178,7 +178,7 @@ const characters = [
     description: "维多亚瑟家族第七十代大小姐，因厌恶贵族虚伪作风而亲近平民。刺客袭击事件导致右眼重伤后，被家族视为\"不祥之人\"，反而获得更多自由行动空间。",
     motto: "铁棘丛中绽放的花，无需向谁证明她的锋芒。",
     status: "alive",
-    avatar: "/assets/avatar/reyna.png"
+    avatar: "/assets/avatar/reyna.webp"
   },
   {
     id: "lumiere",
@@ -198,7 +198,7 @@ const characters = [
     description: "曾经因为瘟疫魔女带来的灾难让她失去了父母，后面因为一场大火夺走了她的双眼，只能依靠自身的听觉和盲杖辅助生活。目前在一家面包店干着服务员工作，虽然眼睛看不见东西，但后面根据练习也能准确分辨得出面包的种类了。",
     motto: "黑暗并非虚无------它只是光明的另一种语言。",
     status: "alive",
-    avatar: "/assets/avatar/lumiere.png"
+    avatar: "/assets/avatar/lumiere.webp"
   },
   {
     id: "qiyubai",
@@ -218,7 +218,7 @@ const characters = [
     description: "戚紫萱的转世，亚人种族，亚人的地位较为低下，携带了部分前世记忆，上一代主人对他做了很多恶事，过分点在于随后还让地痞流氓对她行了污浊之事，导致患上了比较严重的PTSD。",
     motto: "猫有九条命......可为什么我只觉得疼？",
     status: "alive",
-    avatar: "/assets/avatar/qiyubai.png"
+    avatar: "/assets/avatar/qiyubai.webp"
   },
   {
     id: "vanya",
@@ -238,7 +238,7 @@ const characters = [
     description: "被卡莉斯塔教会选中的第13任\"圣女\"，拥有特殊体质------能成为神明降临的容器，代价是灵魂被反复撕裂。历任圣女皆因灵魂枯竭而亡，唯独银铃在彻底崩溃前，被星荧以『生命琼露』与『真我』权能强行挽留。如今，她带着残破的灵魂与模糊的记忆定居净土，成为\"笼中鸟破笼\"的又一象征。",
     motto: "我本可忍受黑暗......如果\"她\"(星荧和久夜)不曾带着光闯进来。",
     status: "alive",
-    avatar: "/assets/avatar/vanya.png"
+    avatar: "/assets/avatar/vanya.webp"
   },
   {
     id: "tanjiu",
@@ -278,7 +278,7 @@ const characters = [
     description: "本质：\"披神袍之人\"------虽为神明，内核始终保留人类时期的共情与韧性。人类时期(阿娜希塔)：生于距今约2500万年的原始流域文明，名字\"阿娜希塔\"意为\"纯洁之水\"。身患不治之症，濒死时被始源与终末之神发现(经过她父母同意的)，带入神界升格为见习天使。因意志坚定被选为裁决之神候选，历经漫长试炼后正式继任。",
     motto: "从来没有真正公正的裁决，也从来没有真正的正义，这些也只是行走于规则的蛀虫而已",
     status: "alive",
-    avatar: "/assets/avatar/anahita.png"
+    avatar: "/assets/avatar/anahita.webp"
   },
   {
     id: "emberstar_stardust",
@@ -298,7 +298,7 @@ const characters = [
   description: "来自某个时间线的唯一幸存者，被神界记录为「星尘之神·阿斯忒里亚」——一个她从未承认的名字。在自己的时间线中被命运的织者以所有同伴的存在为要挟，被迫登神后却目睹一切被抹除。巨大的创伤使人性压倒神性，固结为『星荧』的残响。如今以『神明』身份存在于一切开始与结束的交点，却拒绝神名、只认本名——既是星尘之神，也是星荧之骸，神格让她不朽，人性让她永远疼痛。她不是星荧的『神化』，而是星荧在余烬中固结的人性残响，是那个差点忘记自己名字、最终刻下所有名字的悖论存在。她从未来奔向过去，因为『星荧』是她唯一允许自己携带的归途，也为了这场故事的好结局，陪伴着原本时间线的星荧经历了1260次轮回，在1260次（也是最后一次）轮回里，成功的击杀了命运的织者，后面选择了和原本时间线的自己前往净土。",
   motto: "「我守望一切终末，只为确保无人再需成为我。」",
   status: "alive", 
-  avatar: "/assets/avatar/emberstar-stardust.png"
+  avatar: "/assets/avatar/emberstar-stardust.webp"
   }
 ];
 
