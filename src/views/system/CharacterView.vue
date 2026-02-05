@@ -67,7 +67,7 @@ watch(() => route.query.characterId, (newId) => {
           <div class="detail-info">
             <h2 class="detail-name">{{ characterDetail.name }}</h2>
             <div class="detail-alias">{{ characterDetail.alias }}</div>
-            <div class="character-status" :class="{ active: characterDetail.status === 'alive' }">
+            <div class="character-status" :class="{ active: characterDetail.status === '存活' }">
               {{ characterDetail.status }}
             </div>
             <div class="detail-motto">{{ characterDetail.motto }}</div>
