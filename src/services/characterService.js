@@ -37,7 +37,7 @@ const characters = [
     location: "存活",
     description: "被人畏惧地称作『瘟疫魔女』，但真实愿望只是想做普通女孩。同时具备部分死亡之神和毁灭之神的权能。在被控制期间犯下诸多罪孽，虽深知难以被原谅，仍坚持用修复后的能力帮助他人赎罪。在余娜媞思的审判中，因星荧的证言和自身悔过表现获得宽大处理。",
     motto: "笼中的羽翼终将划破长夜——以新生为刃，斩断枷锁。",
-    status: "alive",
+    status: "存活",
     avatar: '/assets/avatar/lumirise.webp'
   },
   {
