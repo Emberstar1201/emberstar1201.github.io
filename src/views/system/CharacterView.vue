@@ -53,7 +53,7 @@ watch(() => route.query.characterId, (newId) => {
           <div class="character-name">{{ character.name }}</div>
           <div class="character-alias">{{ character.alias }}</div>
           <div class="character-status" :class="{ active: character.status === 'alive' }">
-            {{ character.status === 'alive' ? '存活' : '已逝' }}
+            {{ character.status ===}}
           </div>
         </div>
       </div>
