@@ -53,7 +53,7 @@ watch(() => route.query.characterId, (newId) => {
           <div class="character-name">{{ character.name }}</div>
           <div class="character-alias">{{ character.alias }}</div>
           <div class="character-status" :class="{ active: character.status === 'alive' }">
-            {{ character.status}}
+            {{ character.status }}
           </div>
         </div>
       </div>
@@ -68,7 +68,7 @@ watch(() => route.query.characterId, (newId) => {
             <h2 class="detail-name">{{ characterDetail.name }}</h2>
             <div class="detail-alias">{{ characterDetail.alias }}</div>
             <div class="character-status" :class="{ active: characterDetail.status === 'alive' }">
-              {{ characterDetail.status === 'alive' ? '存活' : '已逝' }}
+              {{ characterDetail.status }}
             </div>
             <div class="detail-motto">{{ characterDetail.motto }}</div>
           </div>
