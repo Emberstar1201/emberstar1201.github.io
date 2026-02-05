@@ -52,7 +52,7 @@ watch(() => route.query.characterId, (newId) => {
           <div v-else class="character-avatar">{{ character.avatar }}</div>
           <div class="character-name">{{ character.name }}</div>
           <div class="character-alias">{{ character.alias }}</div>
-          <div class="character-status" :class="{ active: character.status === 'alive' }">
+          <div class="character-status" :class="{ active: character.status === '存活' }">
             {{ character.status }}
           </div>
         </div>
