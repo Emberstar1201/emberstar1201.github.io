@@ -58,17 +58,17 @@ const soulData = [
   {
     name: "戚紫萱",
     color: "#ff0000",
-    status: "已逝",
+    status: "存活",
     frequency: "0.0Hz",
-    deceased: true,
+    deceased: false,
     dying: false
   },
   {
     name: "戚羽白",
     color: "#ff6347",
-    status: "波动",
-    frequency: "66.5Hz",
-    deceased: false,
+    status: "暂未诞生",
+    frequency: "0.0Hz",
+    deceased: true,
     dying: false
   },
   {
