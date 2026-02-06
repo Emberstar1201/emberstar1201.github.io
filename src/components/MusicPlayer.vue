@@ -99,7 +99,7 @@ const songs = ref([
   },
   {
     id: 12,
-    title: '谢谢',
+    title: 'ありがとう',
     artist: 'KOKIA',
     src: '/assets/audios/ありがとう.mp3',
     cover: '/assets/cover/ありがとう.webp'
@@ -128,6 +128,7 @@ const songs = ref([
   {
     id:16,
     title:'あの日の面影',
+    artist:'',
     src:'assets/audios/あの日の面影.ogg',
     cover:'assets/cover/tiantai.webp'
  }
