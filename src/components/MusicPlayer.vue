@@ -108,8 +108,8 @@ const songs = ref([
         id:13,
         title: 'The Seed Of Dreams',
         artist: '幻塔',
-        src: '/assets/audios/The Seed Of Dreams.mp3', // 假设扩展名
-        cover: '/assets/cover/The Seed Of Dreams.webp' // 假设扩展名
+        src: '/assets/audios/The Seed Of Dreams.mp3', 
+        cover: '/assets/cover/The Seed Of Dreams.webp' 
     },
     {
         id:14,
