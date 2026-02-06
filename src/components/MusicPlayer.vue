@@ -105,28 +105,34 @@ const songs = ref([
     cover: '/assets/cover/ありがとう.webp'
   },
   {
-        id: 13,
+        id:13,
         title: 'The Seed Of Dreams',
         artist: '幻塔',
         src: '/assets/audios/The Seed Of Dreams.mp3', // 假设扩展名
         cover: '/assets/cover/The Seed Of Dreams.webp' // 假设扩展名
     },
     {
-        id: 14,
+        id:14,
         title: 'Sacred Play Secret Place',
         artist: '',
         src: '/assets/audios/sacred play secret place.mp3',
         cover: '/assets/cover/yihan.webp'
     },
     {
-        id: 15,
+        id:15,
         title: 'iberomok',
         artist: '路灰气球',
         src: '/assets/audios/iberomok.mp3',
         cover: '/assets/cover/iberomok.webp'
-  }
+  },
+  {
+    id:16,
+    title:'あの日の面影',
+    src:'assets/audios/あの日の面影.ogg',
+    cover:'assets/cover/tiantai.webp'
+ }
   ]);
-     
+    
 const currentSongIndex = ref(0);
 const currentSong = computed(() => songs.value[currentSongIndex.value]);
 
