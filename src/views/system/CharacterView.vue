@@ -108,6 +108,10 @@ watch(() => route.query.characterId, (newId) => {
               <div class="detail-value">{{ characterDetail.divineEye || '无' }}</div>
             </div>
             <div class="detail-item">
+              <div class="detail-label">能力</div>
+              <div class="detail-value">{{ characterDetail.ability }}</div>
+              </div>
+            <div class="detail-item">
               <div class="detail-label">灵魂性质</div>
               <div class="detail-value">{{ characterDetail.soulNature }}</div>
             </div>
