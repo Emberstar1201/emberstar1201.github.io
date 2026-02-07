@@ -320,8 +320,8 @@ description: "",
 motto: "",
 status: "存活",
 avatar: "/assets/avatar/xiaoxi.webp"
-  }
-];
+    }
+  ];
   
 export function queryCharacters(query) {
   return characters.filter(character =>
