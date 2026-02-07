@@ -299,8 +299,29 @@ const characters = [
   motto: "「我守望一切终末，只为确保无人再需成为我。」",
   status: "存活", 
   avatar: "/assets/avatar/emberstar-stardust.webp"
-  }
-];
+  },
+  {
+    id: "xiaoxin",
+name: "小欣",
+alias: "Xiaoxin",
+age:"11岁",
+gender: "女",
+height: "160cm",
+weight: "42kg",
+race: "人类",
+birthday: "11.22",
+ability: "幻术",
+favoriteFood: "地三鲜,蛋炒饭,烧鸡",
+personality:"天然系的开朗少女，总是乐呵呵的，似乎没什么烦恼。有点小迷糊和小拖延，但运气往往不错。她纯粹的笑容和简单的快乐，能不知不觉间化解周围的紧张气氛。",
+soulNature: "",
+location: "九州",
+description: "",
+motto: "",
+status: "存活",
+avatar: "/assets/avatar/xiaoxi.webp"
+
+  
+    
 
 
 export function queryCharacters(query) {
