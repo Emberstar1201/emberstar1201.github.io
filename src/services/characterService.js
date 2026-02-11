@@ -321,9 +321,31 @@ description: "小欣本是一名普通家庭的女儿，做为家庭和朋友间
 motto: "阿巴阿巴？",
 status: "存活",
 avatar: "/assets/avatar/xiaoxi.webp"
-    }
+    },
+    {
+      
+id: "linxiaoling",
+name: "琳小灵",
+alias: "Lin xiaoling",
+age:"14",
+gender: "女",
+height: "154cm",
+weight: "38kg",
+race: "人",
+birthday: "1月35日",
+divineEye: "无",
+ability:"「终末视界」",
+favoriteFood: "浆果，薄荷叶茶，风干面包",
+personality:"沉默的观察者：遭遇巨变后习惯用沉默保护自己，对外界保持警惕，但观察力敏锐。执着的学徒：在确认体内“声音”（阿斯忒里亚碎片）的支持后，将复仇视为必须完成的使命。她所有的努力都围绕着“获得复仇能力”这一目标，对碎片教导的、关于“终末”的知识与力量如饥似渴地学习，展现出不符年龄的专注与偏执。矛盾的幸存者：复仇之心坚定，但心底仍存有一丝来自过往的、对温柔与美好的微弱眷恋。这让她在面对纯粹善意（如小动物的亲近、他人不求回报的帮助）时，会流露出短暂的动摇与柔软。",
+soulNature: "余烬新芽",
+location: "净土",
+description: "原本是个富家千金，但她的家族为了逃避灰色生意，选择把这件事情嫁祸给他们，他的父母因为这莫须有的罪名被处决，自己年龄小，免于处罚，她的心中有着比较强烈的复仇情绪，现在在偏远的常绿森林地带的一个小屋子里生活!直到，那位神秘的神明（阿斯忒里亚）向她投来了视线",
+motto: "我聆听来自终末的叹息，是为了让我的新生，能成为另一段故事的温柔的序章",
+status: "存活",
+avatar: "/assets/avatar/linxiaoling.webp"
+  }
   ];
-  
+
 export function queryCharacters(query) {
   return characters.filter(character =>
     character.name.includes(query) ||
