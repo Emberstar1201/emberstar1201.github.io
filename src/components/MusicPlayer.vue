@@ -137,7 +137,7 @@ const songs = ref([
     title:'This is my soulless heart',
     artist:'AI',
     src:'assets/audios/This is my soulless heart.ogg',
-    cover:'assets/cover/This is my soulless heart.webp'
+    cover:'assets/cover/soullessheart.webp'
  }
   ]);
     
