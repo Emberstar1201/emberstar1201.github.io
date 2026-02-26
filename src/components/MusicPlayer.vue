@@ -131,6 +131,13 @@ const songs = ref([
     artist:'',
     src:'assets/audios/あの日の面影.ogg',
     cover:'assets/cover/tiantai.webp'
+ },
+ {
+   id:17,
+    title:'This is my soulless heart',
+    artist:'AI',
+    src:'assets/audios/This is my soulless heart.ogg',
+    cover:'assets/cover/This is my soulless heart.webp'
  }
   ]);
     
