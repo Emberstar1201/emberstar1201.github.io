@@ -141,7 +141,7 @@ const songs = ref([
  },
  {
     id:'18',
-    title:'Hello world（Thank you Anahita）',
+    title:'Thank you Anahita',
    artist:'Ember',
    src:'assets/audios/helloworld!.mp3',
    cover：'assets/cover/hello world.webp'
