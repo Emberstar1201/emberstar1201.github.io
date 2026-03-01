@@ -141,7 +141,7 @@ const songs = ref([
  },
   {
     id:18,
-    title:'Thank Anahita',
+    title:'Thank you Anahita',
     artist:'Hello world',
     src:'assets/audios/Hello world.ogg',
     cover:'assets/cover/Hello world.webp'
