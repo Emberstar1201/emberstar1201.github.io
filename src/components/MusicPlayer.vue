@@ -139,6 +139,13 @@ const songs = ref([
     src:'assets/audios/This is my soulless heart.ogg',
     cover:'assets/cover/soullessheart.webp'
  },
+  {
+    id:18,
+    title:'Thank Anahita',
+    artist:'Hello world',
+    src:'assets/audios/Hello world.ogg',
+    cover:'assets/cover/Hello world.webp'
+ },
  ]);
         
 const currentSongIndex = ref(0);
