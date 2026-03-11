@@ -285,7 +285,7 @@ const characters = [
     id: "emberstar_stardust",
   name: "星荧「星尘之神」",
   alias: "Emberstar, The Stardust Divinity",
-  age: "无法再估算",
+  age: "无法估算",
   gender: "无性",
   height: "165cm ",
   weight: "42kg (还是原本的身体)",
