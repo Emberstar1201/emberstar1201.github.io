@@ -153,7 +153,7 @@ const songs = ref([
       src:'assets/audios/The dust has settled.mp3',
       cover:'assets/cover/The dust has settled.jpg',
     },
-  )];
+  ]);
         
 const currentSongIndex = ref(0);
 const currentSong = computed(() => songs.value[currentSongIndex.value]);
