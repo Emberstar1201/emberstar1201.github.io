@@ -146,7 +146,14 @@ const songs = ref([
     src:'assets/audios/Hello world.ogg',
     cover:'assets/cover/Hello world.webp'
  },
- ]);
+    {
+      id:19,
+      title:'The dust has settled',
+      artist:'Emberstar',
+      src:'assets/audios/The dust has settled.mp3',
+      cover:'assets/cover/The dust has settled.jpg',
+    },
+  )];
         
 const currentSongIndex = ref(0);
 const currentSong = computed(() => songs.value[currentSongIndex.value]);
