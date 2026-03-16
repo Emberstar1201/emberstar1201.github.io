@@ -151,7 +151,7 @@ const songs = ref([
       title:'The dust has settled',
       artist:'Emberstar',
       src:'assets/audios/The dust has settled.mp3',
-      cover:'assets/cover/The dust has settled.jpg',
+      cover:'assets/cover/The dust has settled.jpg'
     },
   ]);
         
