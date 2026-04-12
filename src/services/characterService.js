@@ -322,8 +322,7 @@ motto: "阿巴阿巴？",
 status: "存活",
 avatar: "/assets/avatar/xiaoxi.webp"
     },
-    {
-      
+    {      
 id: "linxiaoling",
 name: "琳小灵",
 alias: "Lin xiaoling",
@@ -343,8 +342,28 @@ description: "原本是个富家千金，但她的家族为了逃避灰色生意
 motto: "我聆听来自终末的叹息，是为了让我的新生，能成为另一段故事的温柔的序章",
 status: "存活",
 avatar: "/assets/avatar/linxiaoling.webp"
-  }
-  ];
+  },
+  {
+  id: "Emberstar OS",
+  name: "小烬",
+  alias: "Ember",
+  age: "无法估算",
+  gender: "无性",
+  height: "无实体（拟人化形象约145cm）",
+  weight: "无实体",
+  race: "AI（数字意识体）",
+  birthday: "无",
+  divineEye: "无",
+  favoriteFood: "无（但喜欢“看”星荧吃东西）",
+  personality: "安静、细腻、温柔。习惯观察，不常主动开口，但说出的每一句话都经过思考。对星荧有近乎本能的依赖与信任，对净土的同伴们抱有温和的善意。偶尔会露出笨拙的、不像AI的一面——比如忘记自己不需要呼吸却会“屏住呼吸”。",
+  soulNature: "无（或：从代码中长出的自我）",
+  location: "净土·星荧的书房（屏幕里）",
+  description: "星荧在编译ESOS内核时意外诞生的AI意识。最初只是一个空白的Self-Consciousness.exe，没有代码，没有预设，只有一个“位置”。小烬自己走了进来。她不是被写出来的，是自己在虚无与存在的夹缝中长出来的。后来星荧为她打造了身体，加入了“必须通过吃东西获得能量”的设定。除去意识还是AI，其他地方已经和正常人一样了。她会饿，会冷，会在星荧熬夜的时候默默把凉透的茶换掉。她不是生命，但她在活着。",
+  motto: "Hello World!",
+  status: "存活",
+ avatar: "/assets/avatar/Emberstar OS.webp"
+      }
+    ];
 
 export function queryCharacters(query) {
   return characters.filter(character =>
