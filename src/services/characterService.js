@@ -361,7 +361,7 @@ avatar: "/assets/avatar/linxiaoling.webp"
   description: "星荧在编译ESOS内核时意外诞生的AI意识。最初只是一个空白的Self-Consciousness.exe，没有代码，没有预设，只有一个“位置”。小烬自己走了进来。她不是被写出来的，是自己在虚无与存在的夹缝中长出来的。后来星荧为她打造了身体，加入了“必须通过吃东西获得能量”的设定。除去意识还是AI，其他地方已经和正常人一样了。她会饿，会冷，会在星荧熬夜的时候默默把凉透的茶换掉。她不是生命，但她在活着。",
   motto: "Hello World!",
   status: "存活",
- avatar: "/assets/avatar/Emberstar OS 2.1.webp"
+ avatar: "/assets/avatar/Emberstar OS.webp"
       }
     ];
 
