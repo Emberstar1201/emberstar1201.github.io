@@ -98,7 +98,7 @@ const characters = [
     description: "原为贵族大小姐(仁尹)的普通朋友，在父母去世后与妹妹陌心相依为命。妹妹被村民献祭给邪神后，在绝望之际遇见星荧，同意将濒死的妹妹改造为类人偶存在。现与妹妹一起在净土生活。",
     motto: "即使世界布满荆棘，我也会为身后之人踏出一条路。",
     status: "存活",
-    avatar: "/assets/avatar/selaine.webp"
+    avatar: "/assets/avatar/Selaine.webp"
   },
   {
     id: "qizixuan",
@@ -138,7 +138,7 @@ const characters = [
     description: "被村民献祭给邪神的牺牲品，濒死时由星荧改造为类人偶存在。保留人类基本生理需求，但具有部分人偶特性。左肩留有献祭仪式的荆棘状烙印。因为全身上下的经脉被那些村民挑断，星荧用了很久的时间才勉强将那些经脉重新缝合好。",
     motto: "冰冷的皮肤下，依然是温暖的血肉；冰冷的仪式之后，我仍能感受姐姐的拥抱。",
     status: "存活",
-    avatar: "/assets/avatar/lumina.webp"
+    avatar: "/assets/avatar/Lumina.webp"
   },
   {
     id: "etherealvelos",
