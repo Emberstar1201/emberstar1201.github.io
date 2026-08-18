@@ -1,0 +1,1 @@
+import{D as t,r as u}from"./index-CpSrM1Q1.js";const a=t("user",()=>{const e=u(null),r=u(!1);function n(s){e.value=s,r.value=!0}function o(){e.value=null,r.value=!1}return{currentUser:e,isLoggedIn:r,login:n,logout:o}});export{a as u};
