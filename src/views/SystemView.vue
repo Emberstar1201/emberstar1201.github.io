@@ -1,17 +1,28 @@
 <script setup>
+import { ref } from 'vue'
+import { onMounted } from 'vue'
+import SystemHeader from '@/components/SystemHeader.vue'
+import SearchInput from '@/components/SearchInput.vue'
+import SideBar from '@/components/SideBar.vue'
+import AIChat from '@/components/AIChat.vue'
+import router from '@/router/index.js'
 
-import SystemHeader from "@/components/SystemHeader.vue";
-import SearchInput from "@/components/SearchInput.vue";
-import SideBar from "@/components/SideBar.vue";
-import {onMounted} from "vue";
-import router from "@/router/index.js";
+const showAIChat = ref(false)
 
 const switchSubsystem = (subsystem) => {
-  router.push(`/system/${subsystem}`);
+  router.push(`/system/${subsystem}`)
+}
+
+const startAIChat = () => {
+  showAIChat.value = true
+}
+
+const closeAIChat = () => {
+  showAIChat.value = false
 }
 
 onMounted(() => {
-  router.push("/system/monitor");
+  router.push('/system/monitor')
 })
 </script>
 
@@ -19,9 +30,10 @@ onMounted(() => {
   <SystemHeader />
   <SearchInput />
   <div class="main-content">
-    <SideBar :switchSubsystem="switchSubsystem" />
-    <router-view class="content-area"/>
+    <SideBar :switchSubsystem="switchSubsystem" @start-ai-chat="startAIChat" />
+    <router-view class="content-area" />
   </div>
+  <AIChat :show="showAIChat" @close="closeAIChat" />
 </template>
 
 <style scoped>

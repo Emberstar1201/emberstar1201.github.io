@@ -4,19 +4,24 @@ import { ref } from 'vue';
 // 响应式变量跟踪当前激活的导航项
 const activeItem = ref('');
 
-defineProps({
+const props = defineProps({
   switchSubsystem: {
     type: Function,
     required: true
   }
 });
+
+const emit = defineEmits(['start-ai-chat']);
+
+const openAIChat = () => {
+  emit('start-ai-chat');
+};
 </script>
 
 <template>
   <div class="sidebar">
     <div class="sidebar-title">系统导航</div>
-    <!-- <div class="start-button" id="startButton">开始</div> -->
-    <!-- <div class="effects-toggle" id="effectsToggle">星尘特效: 光轨版</div> -->
+    <div class="start-button" @click="openAIChat">✦ 开始</div>
     &nbsp;
     <div class="nav-item" :class="{ active: activeItem === 'monitor' }" @click="activeItem = 'monitor'; switchSubsystem('monitor')">日常检测报告</div>
     <div class="nav-item" :class="{ active: activeItem === 'defender' }" @click="activeItem = 'defender'; switchSubsystem('defender')">防御系统</div>
