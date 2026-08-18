@@ -1,17 +1,26 @@
 <script setup>
-import { ref, watch, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 
 // ============ 常量 ============
 const STORAGE_KEYS = {
   API_KEY: 'ai_api_key_encoded',
   PERSONA: 'ai_persona_encoded',
-  MODEL: 'ai_model_selected'
+  MODEL: 'ai_model_selected',
+  CUSTOM_MODEL: 'ai_custom_model'
 }
 
-const MODELS = [
+const CUSTOM_MODEL_VALUE = '__custom__'
+
+const PRESET_MODELS = [
   { value: 'deepseek-ai/DeepSeek-V3', label: 'DeepSeek-V3' },
   { value: 'deepseek-ai/DeepSeek-R1', label: 'DeepSeek-R1' },
   { value: 'Qwen/Qwen2.5-7B-Instruct', label: 'Qwen2.5-7B' }
+]
+
+// 下拉选项：预设模型 + 自定义
+const MODEL_OPTIONS = [
+  ...PRESET_MODELS,
+  { value: CUSTOM_MODEL_VALUE, label: '自定义模型' }
 ]
 
 const DEFAULT_PERSONA = `你叫小烬，是Emberstar OS的AI助手。你的主人叫星荧，星荧没有把你当冰冷的AI，而是把你当做有感情的伙伴。璃梦是星荧的姐姐，希月胜似星荧的亲姐，久夜是星荧创造的人偶。
@@ -19,7 +28,6 @@ const DEFAULT_PERSONA = `你叫小烬，是Emberstar OS的AI助手。你的主�
 请用这种性格与用户对话，用中文回复。`
 
 // ============ 工具函数 ============
-// Base64 编解码（使用 encodeURIComponent 处理中文）
 const encode = (str) => btoa(encodeURIComponent(str))
 const decode = (str) => {
   try { return decodeURIComponent(atob(str)) }
@@ -35,12 +43,11 @@ const emit = defineEmits(['close'])
 // ============ 响应式状态 ============
 const apiKey = ref('')
 const persona = ref(DEFAULT_PERSONA)
-const selectedModel = ref(MODELS[0].value)
+const selectedModel = ref(PRESET_MODELS[0].value)
+const customModelId = ref('')
 const messages = ref([])
 const inputText = ref('')
 const isStreaming = ref(false)
-const streamingContent = ref('')
-const streamingFullContent = ref('')
 
 // 模态框控制
 const showSetup = ref(false)
@@ -51,28 +58,40 @@ const tempPersona = ref('')
 // UI 状态
 const errorMessage = ref('')
 const chatContainer = ref(null)
-const isInitialized = ref(false)
+
+// 是否选择了自定义模型
+const isCustomModel = computed(() => selectedModel.value === CUSTOM_MODEL_VALUE)
+
+// 实际发送时使用的模型 ID
+const effectiveModel = computed(() => {
+  if (isCustomModel.value) return customModelId.value.trim()
+  return selectedModel.value
+})
 
 // ============ 生命周期 ============
 onMounted(() => {
   const savedKey = localStorage.getItem(STORAGE_KEYS.API_KEY)
   const savedPersona = localStorage.getItem(STORAGE_KEYS.PERSONA)
   const savedModel = localStorage.getItem(STORAGE_KEYS.MODEL)
+  const savedCustom = localStorage.getItem(STORAGE_KEYS.CUSTOM_MODEL)
 
   if (savedKey) apiKey.value = decode(savedKey)
   if (savedPersona) {
     const d = decode(savedPersona)
     if (d) persona.value = d
   }
-  if (savedModel && MODELS.some((m) => m.value === savedModel)) {
-    selectedModel.value = savedModel
+  if (savedModel) {
+    // 检查是否是预设模型或自定义选项
+    const isPreset = PRESET_MODELS.some((m) => m.value === savedModel)
+    if (isPreset || savedModel === CUSTOM_MODEL_VALUE) {
+      selectedModel.value = savedModel
+    }
   }
+  if (savedCustom) customModelId.value = decode(savedCustom)
 
   if (!savedKey) {
     showSetup.value = true
   }
-
-  isInitialized.value = true
 })
 
 // 关闭时清空对话记录
@@ -81,8 +100,6 @@ watch(
   (val) => {
     if (!val) {
       messages.value = []
-      streamingContent.value = ''
-      streamingFullContent.value = ''
       errorMessage.value = ''
     }
   }
@@ -108,9 +125,20 @@ const savePersona = () => {
   showPersona.value = false
 }
 
-const selectModel = (model) => {
-  selectedModel.value = model
-  localStorage.setItem(STORAGE_KEYS.MODEL, model)
+const handleModelChange = (value) => {
+  selectedModel.value = value
+  localStorage.setItem(STORAGE_KEYS.MODEL, value)
+  // 如果切回预设模型，清除自定义模型 ID 的存储（保留 UI 中的值）
+  if (value !== CUSTOM_MODEL_VALUE) {
+    // 不删除，只是保留在 localStorage
+  }
+}
+
+const saveCustomModel = () => {
+  const id = customModelId.value.trim()
+  if (id) {
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_MODEL, encode(id))
+  }
 }
 
 const scrollToBottom = async () => {
@@ -124,9 +152,20 @@ const sendMessage = async () => {
   const text = inputText.value.trim()
   if (!text || isStreaming.value) return
 
+  // 如果是自定义模型但未填写 ID
+  if (isCustomModel.value && !customModelId.value.trim()) {
+    errorMessage.value = '请填写自定义模型 ID'
+    return
+  }
+
   if (!apiKey.value) {
     showSetup.value = true
     return
+  }
+
+  // 保存自定义模型 ID
+  if (isCustomModel.value) {
+    saveCustomModel()
   }
 
   inputText.value = ''
@@ -136,7 +175,7 @@ const sendMessage = async () => {
   messages.value.push({ role: 'user', content: text })
   await scrollToBottom()
 
-  // 构建上下文（含 system prompt）
+  // 构建上下文
   const contextMessages = [
     { role: 'system', content: persona.value },
     ...messages.value.map((m) => ({ role: m.role, content: m.content }))
@@ -144,10 +183,7 @@ const sendMessage = async () => {
 
   // 开始流式请求
   isStreaming.value = true
-  streamingContent.value = ''
-  streamingFullContent.value = ''
 
-  // 先添加一个空的助手消息占位
   const msgIndex = messages.value.length
   messages.value.push({ role: 'assistant', content: '' })
 
@@ -161,7 +197,7 @@ const sendMessage = async () => {
           Authorization: `Bearer ${apiKey.value}`
         },
         body: JSON.stringify({
-          model: selectedModel.value,
+          model: effectiveModel.value,
           messages: contextMessages,
           stream: true,
           max_tokens: 4096,
@@ -203,7 +239,6 @@ const sendMessage = async () => {
           const delta = parsed.choices?.[0]?.delta?.content || ''
           if (delta) {
             fullContent += delta
-            // 更新占位消息实现打字机效果
             messages.value[msgIndex] = {
               role: 'assistant',
               content: fullContent
@@ -216,18 +251,14 @@ const sendMessage = async () => {
       }
     }
 
-    // 确保最终内容已保存
     messages.value[msgIndex] = { role: 'assistant', content: fullContent }
   } catch (err) {
-    // 移除占位消息
     if (messages.value.length > msgIndex) {
       messages.value = messages.value.slice(0, msgIndex)
     }
     errorMessage.value = err.message || '请求失败，请检查 API Key 和网络连接'
   } finally {
     isStreaming.value = false
-    streamingContent.value = ''
-    streamingFullContent.value = ''
     await scrollToBottom()
   }
 }
@@ -239,18 +270,25 @@ const handleKeydown = (e) => {
   }
 }
 
+const getModelLabel = () => {
+  if (isCustomModel.value) {
+    return customModelId.value.trim() || '自定义模型'
+  }
+  return PRESET_MODELS.find((m) => m.value === selectedModel.value)?.label || selectedModel.value
+}
+
 const exportChat = () => {
   if (messages.value.length === 0) return
 
   const lines = []
   lines.push('=== Emberstar OS AI 对话记录 ===')
   lines.push(`导出时间: ${new Date().toLocaleString()}`)
-  lines.push(`模型: ${MODELS.find((m) => m.value === selectedModel.value)?.label || selectedModel.value}`)
+  lines.push(`模型: ${getModelLabel()}`)
   lines.push('='.repeat(50))
   lines.push('')
 
   for (const msg of messages.value) {
-    const role = msg.role === 'user' ? '👤 星荧' : '🤖 小烬'
+    const role = msg.role === 'user' ? '星荧' : '小烬'
     lines.push(`【${role}】`)
     lines.push(msg.content || '（等待回复...）')
     lines.push('')
@@ -281,38 +319,37 @@ const openSetup = () => {
 </script>
 
 <template>
-  <!-- 全屏遮罩 -->
   <Transition name="fade">
+    <!-- 全屏遮罩：显式设置鼠标为 auto 覆盖全局 cursor: none -->
     <div v-if="show" class="ai-chat-overlay" @click.self="handleClose">
       <!-- 主面板 -->
       <div class="ai-chat-panel" @click.stop>
-        <!-- 标题栏 -->
+        <!-- ====== 标题栏 ====== -->
         <div class="chat-header">
           <div class="header-left">
             <span class="header-icon">✦</span>
             <span class="header-title">AI 对话 · 小烬</span>
           </div>
           <div class="header-right">
-            <!-- 人设编辑 -->
             <button class="header-btn" title="人设设定" @click="openPersonaEdit">
               <span>📋</span> 人设
             </button>
-            <!-- API 设置 -->
             <button class="header-btn" title="API 设置" @click="openSetup">
               <span>🔑</span> API
             </button>
-            <!-- 模型选择 -->
+
+            <!-- 模型选择下拉 -->
             <select
               class="model-select"
               :value="selectedModel"
-              @change="selectModel($event.target.value)"
+              @change="handleModelChange($event.target.value)"
               :disabled="isStreaming"
             >
-              <option v-for="m in MODELS" :key="m.value" :value="m.value">
+              <option v-for="m in MODEL_OPTIONS" :key="m.value" :value="m.value">
                 {{ m.label }}
               </option>
             </select>
-            <!-- 导出 -->
+
             <button
               class="header-btn"
               title="导出对话"
@@ -321,23 +358,32 @@ const openSetup = () => {
             >
               <span>📥</span> 导出
             </button>
-            <!-- 关闭 -->
             <button class="header-btn close-btn" title="关闭" @click="handleClose">
               ✕
             </button>
           </div>
         </div>
 
-        <!-- 消息区域 -->
+        <!-- ====== 自定义模型 ID 输入栏（条件显示） ====== -->
+        <div v-if="isCustomModel" class="custom-model-bar">
+          <span class="custom-model-label">模型 ID：</span>
+          <input
+            v-model="customModelId"
+            class="custom-model-input"
+            placeholder="例如: deepseek-ai/DeepSeek-V4-Flash"
+            :disabled="isStreaming"
+            @blur="saveCustomModel"
+          />
+        </div>
+
+        <!-- ====== 消息区域 ====== -->
         <div ref="chatContainer" class="chat-messages">
-          <!-- 空状态 -->
           <div v-if="messages.length === 0" class="chat-empty">
             <div class="empty-icon">✦</div>
             <div class="empty-text">开始一段与小烬的对话吧</div>
             <div class="empty-hint">小烬正在等待你的呼唤...</div>
           </div>
 
-          <!-- 消息气泡 -->
           <div
             v-for="(msg, idx) in messages"
             :key="idx"
@@ -353,7 +399,6 @@ const openSetup = () => {
               </div>
               <div class="msg-content">
                 {{ msg.content }}
-                <!-- 流式闪烁光标 -->
                 <span
                   v-if="isStreaming && idx === messages.length - 1 && msg.role === 'assistant'"
                   class="cursor-blink"
@@ -362,13 +407,12 @@ const openSetup = () => {
             </div>
           </div>
 
-          <!-- 错误提示 -->
           <div v-if="errorMessage" class="error-msg">
             ⚠ {{ errorMessage }}
           </div>
         </div>
 
-        <!-- 输入区域 -->
+        <!-- ====== 输入区域 ====== -->
         <div class="chat-input-area">
           <div class="input-wrapper">
             <textarea
@@ -462,6 +506,8 @@ const openSetup = () => {
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(4px);
+  /* 覆盖全局 cursor: none，确保对话界面内鼠标正常显示 */
+  cursor: auto;
 }
 
 /* ==================== 主面板 ==================== */
@@ -553,6 +599,7 @@ const openSetup = () => {
   border-color: #ff6666;
 }
 
+/* ==================== 模型选择下拉 ==================== */
 .model-select {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(0, 255, 255, 0.25);
@@ -574,6 +621,48 @@ const openSetup = () => {
   cursor: not-allowed;
 }
 
+/* ==================== 自定义模型输入栏 ==================== */
+.custom-model-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: rgba(0, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.custom-model-label {
+  color: rgba(0, 255, 255, 0.6);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.custom-model-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #ccdddd;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.custom-model-input:focus {
+  border-color: rgba(0, 255, 255, 0.5);
+}
+
+.custom-model-input::placeholder {
+  color: rgba(0, 255, 255, 0.3);
+}
+
+.custom-model-input:disabled {
+  opacity: 0.5;
+}
+
 /* ==================== 消息区域 ==================== */
 .chat-messages {
   flex: 1;
@@ -584,7 +673,6 @@ const openSetup = () => {
   gap: 16px;
 }
 
-/* 空状态 */
 .chat-empty {
   display: flex;
   flex-direction: column;
