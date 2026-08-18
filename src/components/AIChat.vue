@@ -6,21 +6,13 @@ const STORAGE_KEYS = {
   API_KEY: 'ai_api_key_encoded',
   PERSONA: 'ai_persona_encoded',
   MODEL: 'ai_model_selected',
-  CUSTOM_MODEL: 'ai_custom_model'
+  CUSTOM_MODELS: 'ai_custom_models'
 }
-
-const CUSTOM_MODEL_VALUE = '__custom__'
 
 const PRESET_MODELS = [
   { value: 'deepseek-ai/DeepSeek-V3', label: 'DeepSeek-V3' },
   { value: 'deepseek-ai/DeepSeek-R1', label: 'DeepSeek-R1' },
   { value: 'Qwen/Qwen2.5-7B-Instruct', label: 'Qwen2.5-7B' }
-]
-
-// 下拉选项：预设模型 + 自定义
-const MODEL_OPTIONS = [
-  ...PRESET_MODELS,
-  { value: CUSTOM_MODEL_VALUE, label: '自定义模型' }
 ]
 
 const DEFAULT_PERSONA = `你叫小烬，是Emberstar OS的AI助手。你的主人叫星荧，星荧没有把你当冰冷的AI，而是把你当做有感情的伙伴。璃梦是星荧的姐姐，希月胜似星荧的亲姐，久夜是星荧创造的人偶。
@@ -44,7 +36,7 @@ const emit = defineEmits(['close'])
 const apiKey = ref('')
 const persona = ref(DEFAULT_PERSONA)
 const selectedModel = ref(PRESET_MODELS[0].value)
-const customModelId = ref('')
+const customModels = ref([]) // [{ id: 'xxx', label: 'xxx' }]
 const messages = ref([])
 const inputText = ref('')
 const isStreaming = ref(false)
@@ -52,42 +44,48 @@ const isStreaming = ref(false)
 // 模态框控制
 const showSetup = ref(false)
 const showPersona = ref(false)
+const showAddModel = ref(false)
 const tempApiKey = ref('')
 const tempPersona = ref('')
+const newModelId = ref('')
 
 // UI 状态
 const errorMessage = ref('')
 const chatContainer = ref(null)
 
-// 是否选择了自定义模型
-const isCustomModel = computed(() => selectedModel.value === CUSTOM_MODEL_VALUE)
-
-// 实际发送时使用的模型 ID
-const effectiveModel = computed(() => {
-  if (isCustomModel.value) return customModelId.value.trim()
-  return selectedModel.value
-})
+// 合并后的模型选项列表
+const modelOptions = computed(() => [
+  ...PRESET_MODELS,
+  ...customModels.value.map(m => ({ value: m.id, label: m.label }))
+])
 
 // ============ 生命周期 ============
 onMounted(() => {
   const savedKey = localStorage.getItem(STORAGE_KEYS.API_KEY)
   const savedPersona = localStorage.getItem(STORAGE_KEYS.PERSONA)
   const savedModel = localStorage.getItem(STORAGE_KEYS.MODEL)
-  const savedCustom = localStorage.getItem(STORAGE_KEYS.CUSTOM_MODEL)
+  const savedCustoms = localStorage.getItem(STORAGE_KEYS.CUSTOM_MODELS)
 
   if (savedKey) apiKey.value = decode(savedKey)
   if (savedPersona) {
     const d = decode(savedPersona)
     if (d) persona.value = d
   }
+  if (savedCustoms) {
+    try {
+      const parsed = JSON.parse(decode(savedCustoms))
+      if (Array.isArray(parsed)) customModels.value = parsed
+    } catch { /* ignore */ }
+  }
   if (savedModel) {
-    // 检查是否是预设模型或自定义选项
-    const isPreset = PRESET_MODELS.some((m) => m.value === savedModel)
-    if (isPreset || savedModel === CUSTOM_MODEL_VALUE) {
+    const allValues = [
+      ...PRESET_MODELS.map(m => m.value),
+      ...customModels.value.map(m => m.id)
+    ]
+    if (allValues.includes(savedModel)) {
       selectedModel.value = savedModel
     }
   }
-  if (savedCustom) customModelId.value = decode(savedCustom)
 
   if (!savedKey) {
     showSetup.value = true
@@ -125,20 +123,47 @@ const savePersona = () => {
   showPersona.value = false
 }
 
-const handleModelChange = (value) => {
-  selectedModel.value = value
-  localStorage.setItem(STORAGE_KEYS.MODEL, value)
-  // 如果切回预设模型，清除自定义模型 ID 的存储（保留 UI 中的值）
-  if (value !== CUSTOM_MODEL_VALUE) {
-    // 不删除，只是保留在 localStorage
+// 持久化自定义模型列表
+const persistCustomModels = () => {
+  localStorage.setItem(STORAGE_KEYS.CUSTOM_MODELS, encode(JSON.stringify(customModels.value)))
+}
+
+// 添加自定义模型
+const addCustomModel = () => {
+  const id = newModelId.value.trim()
+  if (!id) return
+
+  // 检查是否已存在
+  const exists = modelOptions.value.some(m => m.value === id)
+  if (exists) {
+    errorMessage.value = '该模型 ID 已存在'
+    return
+  }
+
+  customModels.value.push({ id, label: id })
+  persistCustomModels()
+  selectedModel.value = id
+  localStorage.setItem(STORAGE_KEYS.MODEL, id)
+  showAddModel.value = false
+  newModelId.value = ''
+  errorMessage.value = ''
+}
+
+// 删除自定义模型
+const removeCustomModel = (modelId) => {
+  customModels.value = customModels.value.filter(m => m.id !== modelId)
+  persistCustomModels()
+
+  // 如果当前选中的是被删除的模型，切回第一个预设模型
+  if (selectedModel.value === modelId) {
+    selectedModel.value = PRESET_MODELS[0].value
+    localStorage.setItem(STORAGE_KEYS.MODEL, selectedModel.value)
   }
 }
 
-const saveCustomModel = () => {
-  const id = customModelId.value.trim()
-  if (id) {
-    localStorage.setItem(STORAGE_KEYS.CUSTOM_MODEL, encode(id))
-  }
+const handleModelChange = (value) => {
+  selectedModel.value = value
+  localStorage.setItem(STORAGE_KEYS.MODEL, value)
 }
 
 const scrollToBottom = async () => {
@@ -152,20 +177,9 @@ const sendMessage = async () => {
   const text = inputText.value.trim()
   if (!text || isStreaming.value) return
 
-  // 如果是自定义模型但未填写 ID
-  if (isCustomModel.value && !customModelId.value.trim()) {
-    errorMessage.value = '请填写自定义模型 ID'
-    return
-  }
-
   if (!apiKey.value) {
     showSetup.value = true
     return
-  }
-
-  // 保存自定义模型 ID
-  if (isCustomModel.value) {
-    saveCustomModel()
   }
 
   inputText.value = ''
@@ -197,7 +211,7 @@ const sendMessage = async () => {
           Authorization: `Bearer ${apiKey.value}`
         },
         body: JSON.stringify({
-          model: effectiveModel.value,
+          model: selectedModel.value,
           messages: contextMessages,
           stream: true,
           max_tokens: 4096,
@@ -270,20 +284,13 @@ const handleKeydown = (e) => {
   }
 }
 
-const getModelLabel = () => {
-  if (isCustomModel.value) {
-    return customModelId.value.trim() || '自定义模型'
-  }
-  return PRESET_MODELS.find((m) => m.value === selectedModel.value)?.label || selectedModel.value
-}
-
 const exportChat = () => {
   if (messages.value.length === 0) return
 
   const lines = []
   lines.push('=== Emberstar OS AI 对话记录 ===')
   lines.push(`导出时间: ${new Date().toLocaleString()}`)
-  lines.push(`模型: ${getModelLabel()}`)
+  lines.push(`模型: ${selectedModel.value}`)
   lines.push('='.repeat(50))
   lines.push('')
 
@@ -316,6 +323,11 @@ const openSetup = () => {
   tempApiKey.value = apiKey.value
   showSetup.value = true
 }
+
+const openAddModel = () => {
+  newModelId.value = ''
+  showAddModel.value = true
+}
 </script>
 
 <template>
@@ -345,9 +357,16 @@ const openSetup = () => {
               @change="handleModelChange($event.target.value)"
               :disabled="isStreaming"
             >
-              <option v-for="m in MODEL_OPTIONS" :key="m.value" :value="m.value">
-                {{ m.label }}
-              </option>
+              <optgroup label="预设模型">
+                <option v-for="m in PRESET_MODELS" :key="m.value" :value="m.value">
+                  {{ m.label }}
+                </option>
+              </optgroup>
+              <optgroup v-if="customModels.length > 0" label="自定义模型">
+                <option v-for="m in customModels" :key="m.id" :value="m.id">
+                  {{ m.label }}
+                </option>
+              </optgroup>
             </select>
 
             <button
@@ -364,16 +383,23 @@ const openSetup = () => {
           </div>
         </div>
 
-        <!-- ====== 自定义模型 ID 输入栏（条件显示） ====== -->
-        <div v-if="isCustomModel" class="custom-model-bar">
-          <span class="custom-model-label">模型 ID：</span>
-          <input
-            v-model="customModelId"
-            class="custom-model-input"
-            placeholder="例如: deepseek-ai/DeepSeek-V4-Flash"
-            :disabled="isStreaming"
-            @blur="saveCustomModel"
-          />
+        <!-- ====== 自定义模型管理栏 ====== -->
+        <div class="custom-model-bar">
+          <span class="custom-model-label">已添加：</span>
+          <div class="custom-model-tags">
+            <span v-if="customModels.length === 0" class="no-custom-hint">无</span>
+            <span
+              v-for="m in customModels"
+              :key="m.id"
+              class="custom-tag"
+              :class="{ active: selectedModel === m.id }"
+              @click="selectedModel = m.id; localStorage.setItem(STORAGE_KEYS.MODEL, m.id)"
+            >
+              {{ m.label }}
+              <button class="tag-remove" @click.stop="removeCustomModel(m.id)" title="删除此模型">✕</button>
+            </span>
+          </div>
+          <button class="add-model-btn" @click="openAddModel">+ 添加自定义模型</button>
         </div>
 
         <!-- ====== 消息区域 ====== -->
@@ -484,6 +510,33 @@ const openSetup = () => {
                 :disabled="!tempPersona.trim()"
                 @click="savePersona"
               >保存</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+
+      <!-- ====== 添加自定义模型模态框 ====== -->
+      <Transition name="modal">
+        <div v-if="showAddModel" class="modal-overlay" @click.self="showAddModel = false">
+          <div class="modal-panel" @click.stop>
+            <div class="modal-title">➕ 添加自定义模型</div>
+            <div class="modal-desc">
+              请输入完整的模型 ID，例如：<code>deepseek-ai/DeepSeek-V4-Flash</code>
+            </div>
+            <input
+              v-model="newModelId"
+              type="text"
+              class="modal-input"
+              placeholder="例如: deepseek-ai/DeepSeek-V4-Flash"
+              @keydown.enter="addCustomModel"
+            />
+            <div class="modal-actions">
+              <button class="modal-btn secondary" @click="showAddModel = false">取消</button>
+              <button
+                class="modal-btn primary"
+                :disabled="!newModelId.trim()"
+                @click="addCustomModel"
+              >确定</button>
             </div>
           </div>
         </div>
@@ -621,46 +674,94 @@ const openSetup = () => {
   cursor: not-allowed;
 }
 
-/* ==================== 自定义模型输入栏 ==================== */
+/* ==================== 自定义模型管理栏 ==================== */
 .custom-model-bar {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px 20px;
-  background: rgba(0, 255, 255, 0.03);
+  background: rgba(0, 255, 255, 0.02);
   border-bottom: 1px solid rgba(0, 255, 255, 0.1);
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .custom-model-label {
-  color: rgba(0, 255, 255, 0.6);
-  font-size: 0.8rem;
+  color: rgba(0, 255, 255, 0.5);
+  font-size: 0.78rem;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
-.custom-model-input {
+.custom-model-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
   flex: 1;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.no-custom-hint {
+  color: rgba(0, 255, 255, 0.25);
+  font-size: 0.78rem;
+}
+
+.custom-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: rgba(0, 255, 255, 0.06);
+  border: 1px solid rgba(0, 255, 255, 0.15);
   border-radius: 4px;
-  color: #ccdddd;
-  padding: 6px 10px;
-  font-size: 0.82rem;
+  color: rgba(0, 255, 255, 0.7);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-tag:hover {
+  background: rgba(0, 255, 255, 0.1);
+  border-color: rgba(0, 255, 255, 0.3);
+}
+
+.custom-tag.active {
+  background: rgba(0, 255, 255, 0.12);
+  border-color: #00ffff;
+  color: #00ffff;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: rgba(255, 80, 80, 0.6);
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 0 2px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.tag-remove:hover {
+  color: #ff6666;
+}
+
+.add-model-btn {
+  background: transparent;
+  border: 1px dashed rgba(0, 255, 255, 0.25);
+  border-radius: 4px;
+  color: rgba(0, 255, 255, 0.6);
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
   font-family: inherit;
-  outline: none;
+  white-space: nowrap;
 }
 
-.custom-model-input:focus {
-  border-color: rgba(0, 255, 255, 0.5);
-}
-
-.custom-model-input::placeholder {
-  color: rgba(0, 255, 255, 0.3);
-}
-
-.custom-model-input:disabled {
-  opacity: 0.5;
+.add-model-btn:hover {
+  border-color: #00ffff;
+  color: #00ffff;
+  background: rgba(0, 255, 255, 0.06);
 }
 
 /* ==================== 消息区域 ==================== */

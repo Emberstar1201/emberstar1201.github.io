@@ -266,6 +266,52 @@ const toggleMute = () => {
 };
 
 // 切换歌曲（通用方法）
+// 播放模式：list_loop（列表循环）| single_loop（单曲循环）| no_loop（不循环）
+const playMode = ref('list_loop')
+const toastMessage = ref('')
+let toastTimer = null
+
+const PLAY_MODES = [
+  { value: 'list_loop', icon: '🔁', label: '列表循环' },
+  { value: 'single_loop', icon: '🔂', label: '单曲循环' },
+  { value: 'no_loop', icon: '▶️', label: '不循环（顺序播放）' }
+]
+
+const showToast = (msg) => {
+  toastMessage.value = msg
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { toastMessage.value = '' }, 2000)
+}
+
+const cyclePlayMode = () => {
+  const modes = PLAY_MODES.map(m => m.value)
+  const idx = modes.indexOf(playMode.value)
+  playMode.value = modes[(idx + 1) % modes.length]
+  localStorage.setItem('music_play_mode', playMode.value)
+  const current = PLAY_MODES.find(m => m.value === playMode.value)
+  showToast(`已切换至：${current.label}`)
+}
+
+// 处理歌曲播放结束
+const handleSongEnd = () => {
+  if (playMode.value === 'single_loop') {
+    // 单曲循环：重播当前歌曲
+    audioElement.value.currentTime = 0
+    audioElement.value.play().catch(() => {})
+  } else if (playMode.value === 'no_loop') {
+    // 不循环：播下一首，如果是最后一首则停止
+    if (currentSongIndex.value < songs.value.length - 1) {
+      nextSong()
+    } else {
+      isPlaying.value = false
+      stopCoverRotate()
+    }
+  } else {
+    // 列表循环（默认）：播下一首，最后一首回到第一首
+    nextSong()
+  }
+}
+
 const changeSong = async (index) => {
   if (isLoadingSong.value || index === currentSongIndex.value) return; // 避免重复操作
 
@@ -355,6 +401,11 @@ onMounted(() => {
     // 预加载音频元数据
     audioElement.value.load();
   }
+  // 恢复播放模式
+  const savedMode = localStorage.getItem('music_play_mode')
+  if (savedMode && PLAY_MODES.some(m => m.value === savedMode)) {
+    playMode.value = savedMode
+  }
 });
 
 // 组件卸载时清理
@@ -373,7 +424,7 @@ onUnmounted(() => {
       :src="currentSong.src"
       @timeupdate="updateCurrentTime"
       @loadedmetadata="setDuration"
-      @ended="nextSong"
+      @ended="handleSongEnd"
       @error="() => { isPlaying = false; stopCoverRotate(); }"
     ></audio>
     
@@ -436,19 +487,28 @@ onUnmounted(() => {
           </transition>
           
           <!-- 播放控制和音量按钮 -->
-          <div class="controls-row">
-            <!-- 播放控制 -->
-            <div class="controls">
-              <button class="control-btn" @click="prevSong" title="上一首">
-                ⏮️
-              </button>
-              <button class="control-btn play-btn" @click="togglePlay" title="播放/暂停">
-                {{ isPlaying ? '⏸️' : '▶️' }}
-              </button>
-              <button class="control-btn" @click="nextSong" title="下一首">
-                ⏭️
-              </button>
-            </div>
+            <div class="controls-row">
+              <!-- 播放控制 -->
+              <div class="controls">
+                <button class="control-btn" @click="prevSong" title="上一首">
+                  ⏮️
+                </button>
+                <button class="control-btn play-btn" @click="togglePlay" title="播放/暂停">
+                  {{ isPlaying ? '⏸️' : '▶️' }}
+                </button>
+                <button class="control-btn" @click="nextSong" title="下一首">
+                  ⏭️
+                </button>
+                <!-- 播放模式切换 -->
+                <button
+                  class="control-btn mode-btn"
+                  :class="`mode-${playMode}`"
+                  @click="cyclePlayMode"
+                  :title="PLAY_MODES.find(m => m.value === playMode)?.label"
+                >
+                  {{ PLAY_MODES.find(m => m.value === playMode)?.icon }}
+                </button>
+              </div>
             
             <!-- 音量控制（优化交互） -->
             <div class="volume-control">
@@ -496,6 +556,12 @@ onUnmounted(() => {
         </div>
       </transition>
     </div>
+    <!-- 播放模式提示 Toast -->
+    <Transition name="toast">
+      <div v-if="toastMessage" class="play-mode-toast">
+        {{ toastMessage }}
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -957,6 +1023,51 @@ onUnmounted(() => {
   font-size: 12px;
   color: #cccccc;
   margin-top: 6px;
+}
+
+/* 播放模式按钮 */
+.mode-btn {
+  font-size: 16px !important;
+}
+
+.mode-list_loop {
+  color: #00ffff !important;
+}
+
+.mode-single_loop {
+  color: #ffcc00 !important;
+}
+
+.mode-no_loop {
+  color: #aaaaaa !important;
+}
+
+/* Toast 提示 */
+.play-mode-toast {
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(0, 170, 255, 0.4);
+  color: #ffffff;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1001;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(8px);
 }
 
 /* 响应式设计（适配更小屏幕） */
