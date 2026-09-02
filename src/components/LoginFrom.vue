@@ -1,6 +1,6 @@
 <script setup>
 import {ref} from "vue";
-import {getAllUsers, getUserByUsername} from "@/services/userService.js";
+import {getAllUsers, getUserByUsername, registerUser} from "@/services/userService.js";
 import {useUserStore} from '@/stores/user'
 import MultilingualTypewriter from "@/components/MultilingualTypewriter.vue";
 
@@ -15,9 +15,18 @@ const props = defineProps({
 });
 
 const isUserSelectionActive = ref(false);
+const isRegisterActive = ref(false);        // 注册弹窗
 const userList = ref([]); // 用户列表数据，可以通过API获取或静态定义
 const username = ref('');
 const password = ref('');
+
+// 注册表单
+const regUsername = ref('');
+const regPassword = ref('');
+const regPassword2 = ref('');
+const regDisplayName = ref('');
+const regError = ref('');
+const regSuccess = ref('');
 
 const openUserSelection = () => {
   isUserSelectionActive.value = true;
@@ -76,10 +85,83 @@ const skipLogin = () => {
   userStore.login(getUserByUsername("Emberstar"))
   props.updateStage(2); // 2 代表加载阶段
 };
+
+// ============ 注册弹窗 ============
+const openRegister = () => {
+  regUsername.value = ''
+  regPassword.value = ''
+  regPassword2.value = ''
+  regDisplayName.value = ''
+  regError.value = ''
+  regSuccess.value = ''
+  isRegisterActive.value = true
+}
+const closeRegister = () => {
+  isRegisterActive.value = false
+}
+const handleRegister = () => {
+  regError.value = ''
+  regSuccess.value = ''
+  if (!regUsername.value.trim()) { regError.value = '请输入用户名'; return }
+  if (!regPassword.value.trim()) { regError.value = '请输入密码'; return }
+  if (regPassword.value !== regPassword2.value) { regError.value = '两次密码不一致'; return }
+
+  const res = registerUser(regUsername.value, regPassword.value, regDisplayName.value)
+  if (res.ok) {
+    regSuccess.value = `注册成功！欢迎 ${res.user.displayName} ✨`
+    // 自动把新账号填到登录框
+    setTimeout(() => {
+      username.value = regUsername.value
+      password.value = regPassword.value
+      isRegisterActive.value = false
+    }, 1200)
+  } else {
+    regError.value = res.message
+  }
+}
 </script>
 
 <template>
   <div class="login-container">
+    <!-- 注册弹窗 (z-index 最高，盖在一切之上) -->
+    <Teleport to="body">
+      <div v-if="isRegisterActive" class="modal-backdrop" @click.self="closeRegister">
+        <div class="register-modal">
+          <div class="register-title">✦ 创建正式账户 ✦</div>
+
+          <div class="form-group">
+            <label class="form-label">用户名</label>
+            <input type="text" class="form-input" placeholder="至少 3 个字符" v-model="regUsername" @keyup.enter="handleRegister">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">显示昵称（可选）</label>
+            <input type="text" class="form-input" placeholder="登录后显示的名字" v-model="regDisplayName" @keyup.enter="handleRegister">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">密码</label>
+            <input type="password" class="form-input" placeholder="至少 4 个字符" v-model="regPassword" @keyup.enter="handleRegister">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">确认密码</label>
+            <input type="password" class="form-input" placeholder="再输一次密码" v-model="regPassword2" @keyup.enter="handleRegister">
+          </div>
+
+          <div v-if="regError" class="error-message" style="display:block">{{ regError }}</div>
+          <div v-if="regSuccess" class="success-message">{{ regSuccess }}</div>
+
+          <div class="modal-buttons">
+            <button class="login-button" @click="handleRegister">注册</button>
+            <button class="login-button secondary" @click="closeRegister">取消</button>
+          </div>
+
+          <div class="register-tip">⚠ 前端站点，数据保存在浏览器 localStorage；换设备/清缓存会丢失</div>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- 使用Vue的Transition组件添加切换动画 -->
     <Transition name="fade-slide" mode="out-in">
       <div v-if="isUserSelectionActive" :key="'userSelection'">
@@ -116,6 +198,7 @@ const skipLogin = () => {
           </div>
           <button class="login-button" id="loginButton" @click="handleLogin">登录</button>
           <button class="login-button" id="userSelectButton" style="margin-top: 10px;" @click="openUserSelection">选择用户</button>
+          <button class="login-button secondary" style="margin-top: 10px;" @click="openRegister">创建正式账户</button>
           <div class="error-message" id="errorMessage">用户名或密码错误，请重试</div>
         </div>
       </div>
@@ -381,5 +464,80 @@ const skipLogin = () => {
 
 .back-button:hover {
   background-color: rgba(0, 255, 255, 0.1);
+}
+
+/* ============ 注册弹窗 ============ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.register-modal {
+  background-color: rgba(10, 10, 18, 0.96);
+  padding: 28px 24px 20px;
+  border-radius: 8px;
+  border: 1px solid #00ffff;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+  width: 90%;
+  max-width: 360px;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+.register-title {
+  text-align: center;
+  font-size: 1.15rem;
+  color: #00ffff;
+  margin-bottom: 18px;
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+  letter-spacing: 2px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+.modal-buttons .login-button { flex: 1; transform: none; }
+
+.login-button.secondary {
+  background-color: rgba(0, 120, 180, 0.15);
+  border-color: #00aaff;
+  color: #7ad7ff;
+}
+.login-button.secondary:hover {
+  background-color: rgba(0, 170, 255, 0.2);
+  box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+}
+
+.success-message {
+  color: #7affb0;
+  font-size: 0.85rem;
+  margin-top: 10px;
+  text-align: center;
+  text-shadow: 0 0 5px rgba(122, 255, 176, 0.4);
+}
+
+.register-tip {
+  margin-top: 14px;
+  font-size: 0.7rem;
+  color: #888;
+  text-align: center;
+  opacity: 0.8;
+  line-height: 1.4;
 }
 </style>

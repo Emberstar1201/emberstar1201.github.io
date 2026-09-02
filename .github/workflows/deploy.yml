@@ -27,6 +27,17 @@ jobs:
       - name: Build project
         run: npm run build
 
+      # ============ Vue SPA on GitHub Pages 必做两件事 ============
+      # 1. 把 index.html 复制一份为 404.html —— GitHub Pages 遇到 404 时返回它，
+      #    Vue Router 接管路径，解决"刷新子路由 404"的千年老问题
+      # 2. 放一个 .nojekyll —— 阻止 GitHub Pages 用 Jekyll 处理，防止下划线开头
+      #    的文件/目录被忽略
+      - name: Fix SPA 404 fallback & disable Jekyll
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
+          ls -la dist/
+
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:

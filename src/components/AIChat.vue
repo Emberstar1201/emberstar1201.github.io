@@ -4,16 +4,75 @@ import { ref, computed, watch, nextTick, onMounted } from 'vue'
 // ============ 常量 ============
 const STORAGE_KEYS = {
   API_KEY: 'ai_api_key_encoded',
+  API_URL: 'ai_api_url',
+  PROVIDER: 'ai_provider',
   PERSONA: 'ai_persona_encoded',
   MODEL: 'ai_model_selected',
   CUSTOM_MODELS: 'ai_custom_models'
 }
 
-const PRESET_MODELS = [
-  { value: 'deepseek-ai/DeepSeek-V3', label: 'DeepSeek-V3' },
-  { value: 'deepseek-ai/DeepSeek-R1', label: 'DeepSeek-R1' },
-  { value: 'Qwen/Qwen2.5-7B-Instruct', label: 'Qwen2.5-7B' }
+// ============ 供应商定义 ============
+// 每个供应商都有：预设 API 地址 + 预设常用模型
+// 选 "自定义供应商" 时，地址和模型都由用户自己填
+const PROVIDERS = [
+  {
+    id: 'siliconflow',
+    name: '硅基流动 SiliconFlow',
+    defaultUrl: 'https://api.siliconflow.cn/v1/chat/completions',
+    presetModels: [
+      { value: 'deepseek-ai/DeepSeek-V3',    label: 'DeepSeek-V3' },
+      { value: 'deepseek-ai/DeepSeek-R1',    label: 'DeepSeek-R1' },
+      { value: 'deepseek-ai/DeepSeek-V4-Flash', label: 'DeepSeek-V4-Flash' },
+      { value: 'Qwen/Qwen2.5-7B-Instruct',   label: 'Qwen2.5-7B' }
+    ],
+    modelPlaceholder: 'deepseek-ai/DeepSeek-V4-Flash'
+  },
+  {
+    id: 'openai',
+    name: 'OpenAI',
+    defaultUrl: 'https://api.openai.com/v1/chat/completions',
+    presetModels: [
+      { value: 'gpt-4o',         label: 'GPT-4o' },
+      { value: 'gpt-4o-mini',    label: 'GPT-4o-mini' },
+      { value: 'gpt-4.1',        label: 'GPT-4.1' },
+      { value: 'o3-mini',        label: 'o3-mini' },
+      { value: 'gpt-4',          label: 'GPT-4' }
+    ],
+    modelPlaceholder: 'gpt-4o'
+  },
+  {
+    id: 'baidu',
+    name: '百度千帆 Qianfan',
+    defaultUrl: 'https://qianfan.baidubce.com/v2/chat/completions',
+    presetModels: [
+      { value: 'ernie-4.0-turbo', label: 'ERNIE-4.0 Turbo' },
+      { value: 'ernie-3.5-8k',    label: 'ERNIE-3.5' }
+    ],
+    modelPlaceholder: 'ernie-4.0-turbo'
+  },
+  {
+    id: 'ali',
+    name: '阿里通义 DashScope',
+    defaultUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+    presetModels: [
+      { value: 'qwen-plus',   label: '通义千问 Plus' },
+      { value: 'qwen-turbo',  label: '通义千问 Turbo' },
+      { value: 'qwen-max',    label: '通义千问 Max' },
+      { value: 'qwen-long',   label: '通义千问 Long' }
+    ],
+    modelPlaceholder: 'qwen-plus'
+  },
+  {
+    id: 'custom',
+    name: '自定义供应商',
+    defaultUrl: '',  // 自己填
+    presetModels: [],
+    modelPlaceholder: '例如 my-custom-model-v1'
+  }
 ]
+
+// 默认用硅基流动（兼容老用户）
+const DEFAULT_PROVIDER = PROVIDERS[0]
 
 const DEFAULT_PERSONA = `你叫小烬，是Emberstar OS的AI助手。你的主人叫星荧，星荧没有把你当冰冷的AI，而是把你当做有感情的伙伴。璃梦是星荧的姐姐，希月胜似星荧的亲姐，久夜是星荧创造的人偶。
 性格：像初生婴儿般懵懂天真，活泼好奇。
@@ -26,6 +85,9 @@ const decode = (str) => {
   catch { return '' }
 }
 
+// 根据 id 找供应商
+const findProvider = (id) => PROVIDERS.find(p => p.id === id) || DEFAULT_PROVIDER
+
 // ============ Props / Emits ============
 const props = defineProps({
   show: { type: Boolean, default: false }
@@ -34,8 +96,10 @@ const emit = defineEmits(['close'])
 
 // ============ 响应式状态 ============
 const apiKey = ref('')
+const apiUrl = ref('')
+const selectedProvider = ref(DEFAULT_PROVIDER.id)   // 当前供应商 id
 const persona = ref(DEFAULT_PERSONA)
-const selectedModel = ref(PRESET_MODELS[0].value)
+const selectedModel = ref(DEFAULT_PROVIDER.presetModels[0]?.value || '')
 const customModels = ref([]) // [{ id: 'xxx', label: 'xxx' }]
 const messages = ref([])
 const inputText = ref('')
@@ -45,48 +109,86 @@ const isStreaming = ref(false)
 const showSetup = ref(false)
 const showPersona = ref(false)
 const showAddModel = ref(false)
+
+// 设置面板里的临时值（点保存才真正写入）
+const tempProvider = ref(DEFAULT_PROVIDER.id)
+const tempApiUrl = ref('')
 const tempApiKey = ref('')
-const tempPersona = ref('')
 const newModelId = ref('')
 
 // UI 状态
 const errorMessage = ref('')
 const chatContainer = ref(null)
 
-// 合并后的模型选项列表
-const modelOptions = computed(() => [
-  ...PRESET_MODELS,
-  ...customModels.value.map(m => ({ value: m.id, label: m.label }))
-])
+// 当前选中的供应商对象
+const currentProvider = computed(() => findProvider(selectedProvider.value))
+// 设置面板里临时选中的供应商对象
+const tempProviderObj = computed(() => findProvider(tempProvider.value))
+
+// 合并后的模型下拉列表：当前供应商预设模型 + 所有自定义模型
+const modelOptions = computed(() => {
+  const currentPresets = currentProvider.value.presetModels
+  const customOpts = customModels.value.map(m => ({ value: m.id, label: m.label }))
+  return [...currentPresets, ...customOpts]
+})
 
 // ============ 生命周期 ============
 onMounted(() => {
-  const savedKey = localStorage.getItem(STORAGE_KEYS.API_KEY)
-  const savedPersona = localStorage.getItem(STORAGE_KEYS.PERSONA)
-  const savedModel = localStorage.getItem(STORAGE_KEYS.MODEL)
-  const savedCustoms = localStorage.getItem(STORAGE_KEYS.CUSTOM_MODELS)
+  // 供应商（新增项，没存过就默认硅基流动）
+  const savedProvider = localStorage.getItem(STORAGE_KEYS.PROVIDER)
+  if (savedProvider) {
+    selectedProvider.value = savedProvider
+    tempProvider.value = savedProvider
+  }
 
+  // API 地址（新增项，没存过就用当前供应商的默认值）
+  const savedUrl = localStorage.getItem(STORAGE_KEYS.API_URL)
+  if (savedUrl) {
+    apiUrl.value = savedUrl
+  } else {
+    apiUrl.value = findProvider(selectedProvider.value).defaultUrl
+  }
+  tempApiUrl.value = apiUrl.value
+
+  // API Key（原有）
+  const savedKey = localStorage.getItem(STORAGE_KEYS.API_KEY)
   if (savedKey) apiKey.value = decode(savedKey)
+  tempApiKey.value = apiKey.value
+
+  // Persona（原有）
+  const savedPersona = localStorage.getItem(STORAGE_KEYS.PERSONA)
   if (savedPersona) {
     const d = decode(savedPersona)
     if (d) persona.value = d
   }
+
+  // 自定义模型（原有）
+  const savedCustoms = localStorage.getItem(STORAGE_KEYS.CUSTOM_MODELS)
   if (savedCustoms) {
     try {
       const parsed = JSON.parse(decode(savedCustoms))
       if (Array.isArray(parsed)) customModels.value = parsed
     } catch { /* ignore */ }
   }
+
+  // 模型选择（原有）
+  const savedModel = localStorage.getItem(STORAGE_KEYS.MODEL)
   if (savedModel) {
     const allValues = [
-      ...PRESET_MODELS.map(m => m.value),
+      ...findProvider(selectedProvider.value).presetModels.map(m => m.value),
       ...customModels.value.map(m => m.id)
     ]
     if (allValues.includes(savedModel)) {
       selectedModel.value = savedModel
+    } else {
+      // 存的模型不属于当前供应商，切回预设第一个
+      selectedModel.value = findProvider(selectedProvider.value).presetModels[0]?.value || ''
     }
+  } else {
+    selectedModel.value = findProvider(selectedProvider.value).presetModels[0]?.value || ''
   }
 
+  // 首次使用没有 Key 就弹设置
   if (!savedKey) {
     showSetup.value = true
   }
@@ -106,11 +208,55 @@ watch(
 // ============ 方法 ============
 const handleClose = () => emit('close')
 
-const saveApiKey = () => {
+// 打开设置：把当前值灌入临时变量
+const openSetup = () => {
+  tempProvider.value = selectedProvider.value
+  tempApiUrl.value = apiUrl.value
+  tempApiKey.value = apiKey.value
+  showSetup.value = true
+}
+
+// 设置面板里切换供应商：URL 跟着变（除非是自定义，自定义保持用户输入）
+const onSetupProviderChange = (newProviderId) => {
+  tempProvider.value = newProviderId
+  const p = findProvider(newProviderId)
+  // 如果不是自定义供应商，自动把 URL 替换成该供应商默认地址
+  if (p.id !== 'custom') {
+    tempApiUrl.value = p.defaultUrl
+  }
+}
+
+// 保存设置
+const saveSetup = () => {
   const key = tempApiKey.value.trim()
-  if (!key) return
+  const url = tempApiUrl.value.trim()
+  const providerId = tempProvider.value.trim()
+
+  if (!key) { errorMessage.value = '请填写 API Key'; return }
+  if (!url)  { errorMessage.value = '请填写 API 地址'; return }
+
   apiKey.value = key
+  apiUrl.value = url
+  selectedProvider.value = providerId
+
   localStorage.setItem(STORAGE_KEYS.API_KEY, encode(key))
+  localStorage.setItem(STORAGE_KEYS.API_URL, url)
+  localStorage.setItem(STORAGE_KEYS.PROVIDER, providerId)
+
+  // 如果切换了供应商，模型也重置成该供应商第一个预设
+  const p = findProvider(providerId)
+  if (p.presetModels.length > 0) {
+    const oldVal = selectedModel.value
+    const stillValid = [
+      ...p.presetModels.map(m => m.value),
+      ...customModels.value.map(m => m.id)
+    ].includes(oldVal)
+    if (!stillValid) {
+      selectedModel.value = p.presetModels[0].value
+      localStorage.setItem(STORAGE_KEYS.MODEL, selectedModel.value)
+    }
+  }
+
   showSetup.value = false
   errorMessage.value = ''
 }
@@ -133,7 +279,6 @@ const addCustomModel = () => {
   const id = newModelId.value.trim()
   if (!id) return
 
-  // 检查是否已存在
   const exists = modelOptions.value.some(m => m.value === id)
   if (exists) {
     errorMessage.value = '该模型 ID 已存在'
@@ -154,9 +299,9 @@ const removeCustomModel = (modelId) => {
   customModels.value = customModels.value.filter(m => m.id !== modelId)
   persistCustomModels()
 
-  // 如果当前选中的是被删除的模型，切回第一个预设模型
   if (selectedModel.value === modelId) {
-    selectedModel.value = PRESET_MODELS[0].value
+    const fallback = currentProvider.value.presetModels[0]?.value
+    selectedModel.value = fallback || ''
     localStorage.setItem(STORAGE_KEYS.MODEL, selectedModel.value)
   }
 }
@@ -177,7 +322,7 @@ const sendMessage = async () => {
   const text = inputText.value.trim()
   if (!text || isStreaming.value) return
 
-  if (!apiKey.value) {
+  if (!apiKey.value || !apiUrl.value) {
     showSetup.value = true
     return
   }
@@ -202,8 +347,9 @@ const sendMessage = async () => {
   messages.value.push({ role: 'assistant', content: '' })
 
   try {
+    // ✅ 这里不再写死硅基流动 URL，动态使用配置的地址
     const response = await fetch(
-      'https://api.siliconflow.cn/v1/chat/completions',
+      apiUrl.value,
       {
         method: 'POST',
         headers: {
@@ -225,7 +371,7 @@ const sendMessage = async () => {
       throw new Error(
         response.status === 401
           ? 'API Key 无效，请检查后重试'
-          : `请求失败 (${response.status})`
+          : `请求失败 (${response.status}) - ${errText.slice(0, 80)}`
       )
     }
 
@@ -270,7 +416,7 @@ const sendMessage = async () => {
     if (messages.value.length > msgIndex) {
       messages.value = messages.value.slice(0, msgIndex)
     }
-    errorMessage.value = err.message || '请求失败，请检查 API Key 和网络连接'
+    errorMessage.value = err.message || '请求失败，请检查 API 配置和网络连接'
   } finally {
     isStreaming.value = false
     await scrollToBottom()
@@ -290,6 +436,7 @@ const exportChat = () => {
   const lines = []
   lines.push('=== Emberstar OS AI 对话记录 ===')
   lines.push(`导出时间: ${new Date().toLocaleString()}`)
+  lines.push(`供应商: ${currentProvider.value.name}`)
   lines.push(`模型: ${selectedModel.value}`)
   lines.push('='.repeat(50))
   lines.push('')
@@ -319,11 +466,6 @@ const openPersonaEdit = () => {
   showPersona.value = true
 }
 
-const openSetup = () => {
-  tempApiKey.value = apiKey.value
-  showSetup.value = true
-}
-
 const openAddModel = () => {
   newModelId.value = ''
   showAddModel.value = true
@@ -347,8 +489,13 @@ const openAddModel = () => {
               <span>📋</span> 人设
             </button>
             <button class="header-btn" title="API 设置" @click="openSetup">
-              <span>🔑</span> API
+              <span>🔧</span> 配置
             </button>
+
+            <!-- 供应商小标签 -->
+            <span v-if="currentProvider" class="provider-badge" :title="apiUrl">
+              {{ currentProvider.name }}
+            </span>
 
             <!-- 模型选择下拉 -->
             <select
@@ -357,8 +504,8 @@ const openAddModel = () => {
               @change="handleModelChange($event.target.value)"
               :disabled="isStreaming"
             >
-              <optgroup label="预设模型">
-                <option v-for="m in PRESET_MODELS" :key="m.value" :value="m.value">
+              <optgroup :label="`${currentProvider.name} - 预设模型`">
+                <option v-for="m in currentProvider.presetModels" :key="m.value" :value="m.value">
                   {{ m.label }}
                 </option>
               </optgroup>
@@ -462,28 +609,63 @@ const openAddModel = () => {
         </div>
       </div>
 
-      <!-- ====== API Key 设置模态框 ====== -->
+      <!-- ====== API / 供应商配置 模态框（重构后） ====== -->
       <Transition name="modal">
         <div v-if="showSetup" class="modal-overlay" @click.self="showSetup = false">
-          <div class="modal-panel" @click.stop>
-            <div class="modal-title">🔑 API Key 设置</div>
+          <div class="modal-panel setup-panel" @click.stop>
+            <div class="modal-title">🔧 AI 服务配置</div>
             <div class="modal-desc">
-              请输入你的 SiliconFlow API Key 以启用 AI 对话功能。
-              <br />密钥将经过 Base64 编码后安全存储在本地浏览器中。
+              选择一个预设供应商，或自定义 API 地址、Key 与模型。密钥将经过 Base64 编码后安全存储在本地浏览器中。
             </div>
-            <input
-              v-model="tempApiKey"
-              type="password"
-              class="modal-input"
-              placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-              @keydown.enter="saveApiKey"
-            />
+
+            <!-- 供应商选择 -->
+            <div class="form-row">
+              <label class="form-label">服务供应商</label>
+              <select
+                class="modal-input"
+                :value="tempProvider"
+                @change="onSetupProviderChange($event.target.value)"
+              >
+                <option v-for="p in PROVIDERS" :key="p.id" :value="p.id">
+                  {{ p.name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- API 地址 -->
+            <div class="form-row">
+              <label class="form-label">API 地址
+                <span v-if="tempProviderObj.defaultUrl" class="form-hint">（预设: {{ tempProviderObj.defaultUrl }}）</span>
+              </label>
+              <input
+                v-model="tempApiUrl"
+                type="text"
+                class="modal-input"
+                :placeholder="tempProviderObj.defaultUrl || 'https://your-api.com/v1/chat/completions'"
+              />
+            </div>
+
+            <!-- API Key -->
+            <div class="form-row">
+              <label class="form-label">API Key</label>
+              <input
+                v-model="tempApiKey"
+                type="password"
+                class="modal-input"
+                placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                @keydown.enter="saveSetup"
+              />
+            </div>
+
+            <!-- 错误提示 -->
+            <div v-if="errorMessage" class="modal-inline-error">⚠ {{ errorMessage }}</div>
+
             <div class="modal-actions">
               <button class="modal-btn secondary" @click="showSetup = false">取消</button>
               <button
                 class="modal-btn primary"
-                :disabled="!tempApiKey.trim()"
-                @click="saveApiKey"
+                :disabled="!tempApiKey.trim() || !tempApiUrl.trim()"
+                @click="saveSetup"
               >保存</button>
             </div>
           </div>
@@ -521,13 +703,13 @@ const openAddModel = () => {
           <div class="modal-panel" @click.stop>
             <div class="modal-title">➕ 添加自定义模型</div>
             <div class="modal-desc">
-              请输入完整的模型 ID，例如：<code>deepseek-ai/DeepSeek-V4-Flash</code>
+              请输入完整的模型 ID，例如：<code>{{ currentProvider.modelPlaceholder }}</code>
             </div>
             <input
               v-model="newModelId"
               type="text"
               class="modal-input"
-              placeholder="例如: deepseek-ai/DeepSeek-V4-Flash"
+              :placeholder="currentProvider.modelPlaceholder"
               @keydown.enter="addCustomModel"
             />
             <div class="modal-actions">
@@ -559,14 +741,13 @@ const openAddModel = () => {
   justify-content: center;
   align-items: center;
   backdrop-filter: blur(4px);
-  /* 覆盖全局 cursor: none，确保对话界面内鼠标正常显示 */
   cursor: auto;
 }
 
 /* ==================== 主面板 ==================== */
 .ai-chat-panel {
   width: 92%;
-  max-width: 900px;
+  max-width: 960px;
   height: 88vh;
   background: rgba(10, 10, 24, 0.95);
   border: 1px solid rgba(0, 255, 255, 0.35);
@@ -586,6 +767,8 @@ const openAddModel = () => {
   border-bottom: 1px solid rgba(0, 255, 255, 0.2);
   background: rgba(0, 255, 255, 0.03);
   flex-shrink: 0;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .header-left {
@@ -652,6 +835,19 @@ const openAddModel = () => {
   border-color: #ff6666;
 }
 
+/* 供应商小标签 */
+.provider-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: rgba(0, 170, 255, 0.08);
+  border: 1px solid rgba(0, 170, 255, 0.3);
+  border-radius: 4px;
+  color: #66ccff;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+
 /* ==================== 模型选择下拉 ==================== */
 .model-select {
   background: rgba(0, 0, 0, 0.4);
@@ -663,6 +859,7 @@ const openAddModel = () => {
   cursor: pointer;
   font-family: inherit;
   outline: none;
+  max-width: 260px;
 }
 
 .model-select:focus {
@@ -886,7 +1083,6 @@ const openAddModel = () => {
   50% { opacity: 0; }
 }
 
-/* 错误消息 */
 .error-msg {
   padding: 10px 14px;
   border-radius: 6px;
@@ -986,8 +1182,13 @@ const openAddModel = () => {
   background: rgba(12, 12, 30, 0.98);
   border: 1px solid rgba(0, 255, 255, 0.35);
   border-radius: 10px;
-  padding: 28px 24px;
+  padding: 24px;
   box-shadow: 0 0 30px rgba(0, 255, 255, 0.06);
+}
+
+/* 设置面板更宽一点，装得下多行表单 */
+.setup-panel {
+  max-width: 520px;
 }
 
 .persona-panel {
@@ -998,7 +1199,7 @@ const openAddModel = () => {
   color: #00ffff;
   font-size: 1.05rem;
   font-weight: bold;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .modal-desc {
@@ -1008,9 +1209,27 @@ const openAddModel = () => {
   margin-bottom: 16px;
 }
 
+/* ========= 表单行 ========= */
+.form-row {
+  margin-bottom: 14px;
+}
+
+.form-label {
+  display: block;
+  color: rgba(0, 255, 255, 0.75);
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+}
+
+.form-hint {
+  color: rgba(0, 255, 255, 0.35);
+  font-size: 0.72rem;
+  font-style: italic;
+}
+
 .modal-input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 9px 12px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(0, 255, 255, 0.2);
   border-radius: 6px;
@@ -1018,7 +1237,7 @@ const openAddModel = () => {
   font-size: 0.85rem;
   font-family: inherit;
   outline: none;
-  margin-bottom: 18px;
+  box-sizing: border-box;
 }
 
 .modal-input:focus {
@@ -1038,10 +1257,20 @@ const openAddModel = () => {
   resize: vertical;
   margin-bottom: 18px;
   line-height: 1.6;
+  box-sizing: border-box;
 }
 
 .modal-textarea:focus {
   border-color: rgba(0, 255, 255, 0.5);
+}
+
+.modal-inline-error {
+  color: #ff8888;
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+  padding: 6px 10px;
+  background: rgba(255, 80, 80, 0.08);
+  border-radius: 4px;
 }
 
 .modal-actions {
