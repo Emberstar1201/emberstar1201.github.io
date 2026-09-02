@@ -2,6 +2,7 @@
 import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { getAllCharacters, getCharacterById } from "@/services/characterService.js";
+import AvatarImg from "@/components/AvatarImg.vue";
 
 const characters = ref([]);
 const characterDetail = ref(null);
@@ -48,8 +49,10 @@ watch(() => route.query.characterId, (newId) => {
       <div class="character-list" v-if="!isShowCharacterDetail">
         <div class="character-card" v-for="character in characters" :key="character.id"
           @click="showCharacterDetail(character)">
-          <img v-if="character.avatar.startsWith('/')" :src="character.avatar" alt="avatar" class="character-avatar"/>
-          <div v-else class="character-avatar">{{ character.avatar }}</div>
+          <div class="character-avatar">
+            <AvatarImg v-if="character.avatar && character.avatar.startsWith('/')" :src="character.avatar" />
+            <span v-else>{{ character.avatar }}</span>
+          </div>
           <div class="character-name">{{ character.name }}</div>
           <div class="character-alias">{{ character.alias }}</div>
           <div class="character-status" :class="{ active: character.status === '存活' }">
@@ -62,8 +65,10 @@ watch(() => route.query.characterId, (newId) => {
       <div class="character-detail" v-else>
         <button class="back-to-list" @click="isShowCharacterDetail = false">返回列表</button>
         <div class="detail-header">
-          <img v-if="characterDetail.avatar.startsWith('/')" :src="characterDetail.avatar" alt="avatar" class="detail-avatar"/>
-          <div v-else class="detail-avatar">{{ characterDetail.avatar }}</div>
+          <div class="detail-avatar">
+            <AvatarImg v-if="characterDetail.avatar && characterDetail.avatar.startsWith('/')" :src="characterDetail.avatar" />
+            <span v-else>{{ characterDetail.avatar }}</span>
+          </div>
           <div class="detail-info">
             <h2 class="detail-name">{{ characterDetail.name }}</h2>
             <div class="detail-alias">{{ characterDetail.alias }}</div>

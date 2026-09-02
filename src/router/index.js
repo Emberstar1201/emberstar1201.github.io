@@ -34,6 +34,10 @@ const router = createRouter({
         {
           path: "/system/dimension",
           component : () => import("@/views/system/DimensionView.vue"),
+        },
+        {
+          path: "/system/worldline-02-character",
+          component : () => import("@/views/system/WorldlineCharacterView.vue"),
         }
       ]
     }
