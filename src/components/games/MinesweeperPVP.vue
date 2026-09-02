@@ -329,6 +329,7 @@ const emit = defineEmits(['exit'])
 
 .grid {
   display: inline-grid;
+  grid-template-columns: repeat(10, 34px);
   gap: 2px;
   background: rgba(0, 255, 255, 0.1);
   padding: 2px;
@@ -340,8 +341,8 @@ const emit = defineEmits(['exit'])
 }
 
 .cell {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;

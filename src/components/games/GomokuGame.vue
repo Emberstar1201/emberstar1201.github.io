@@ -289,12 +289,12 @@ onUnmounted(() => {})
 
 .board {
   display: inline-grid;
-  grid-template-columns: repeat(15, 1fr);
-  background: rgba(20, 20, 35, 0.8);
-  border: 2px solid rgba(0, 255, 255, 0.2);
+  grid-template-columns: repeat(15, 30px);
+  background: rgba(0, 170, 200, 0.15);
+  border: 2px solid rgba(0, 255, 255, 0.3);
   border-radius: 4px;
-  padding: 4px;
-  gap: 1px;
+  padding: 3px;
+  gap: 0;
 }
 
 .cell {
@@ -302,14 +302,16 @@ onUnmounted(() => {})
 }
 
 .cell-item {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   position: relative;
   transition: background 0.15s;
+  border: 1px solid rgba(0, 255, 255, 0.18);
+  background: rgba(15, 15, 30, 0.6);
 }
 
 .cell-item:not(.disabled):hover {
@@ -330,8 +332,8 @@ onUnmounted(() => {})
 }
 
 .stone {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
 }
 
