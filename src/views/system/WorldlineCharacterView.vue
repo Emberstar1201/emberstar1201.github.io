@@ -27,7 +27,7 @@ const worldline02Characters = ref([
     description: "TODO: 填写背景故事描述",
     motto: "TODO: 填写座右铭",
     status: "存活",
-    avatar: '/assets/avatar/emberstar-02.webp'
+    avatar: '/assets/avatar/emberstar 02.webp'
   },
   // 可以继续添加更多角色...
 ]);
