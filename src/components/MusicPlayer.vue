@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
+import { ref, onMounted, computed, onUnmounted } from 'vue';
 
 // 音乐播放器状态
 const isPlaying = ref(false);
@@ -113,45 +113,38 @@ const songs = ref([
     },
     {
         id:14,
-        title: 'Sacred Play Secret Place',
-        artist: '',
-        src: '/assets/audios/sacred play secret place.mp3',
-        cover: '/assets/cover/yihan.webp'
-    },
-    {
-        id:15,
         title: 'iberomok',
         artist: '路灰气球',
         src: '/assets/audios/iberomok.mp3',
         cover: '/assets/cover/iberomok.webp'
   },
   {
-    id:16,
+    id:15,
     title:'あの日の面影',
     artist:'',
-    src:'assets/audios/あの日の面影.ogg',
-    cover:'assets/cover/tiantai.webp'
+    src:'/assets/audios/あの日の面影.ogg',
+    cover:'/assets/cover/tiantai.webp'
  },
  {
-   id:17,
+   id:16,
     title:'This is my soulless heart',
     artist:'AI',
-    src:'assets/audios/This is my soulless heart.ogg',
-    cover:'assets/cover/soullessheart.webp'
+    src:'/assets/audios/This is my soulless heart.ogg',
+    cover:'/assets/cover/soullessheart.webp'
  },
   {
-    id:18,
+    id:17,
     title:'Thank you Anahita',
     artist:'Hello world',
-    src:'assets/audios/Hello world.ogg',
-    cover:'assets/cover/Hello world.webp'
+    src:'/assets/audios/Hello world.ogg',
+    cover:'/assets/cover/Hello world.webp'
  },
     {
-      id:19,
+      id:18,
       title:'The dust has settled',
       artist:'Emberstar',
-      src:'assets/audios/The dust has settled.mp3',
-      cover:'assets/cover/The dust has settled.jpg'
+      src:'/assets/audios/The dust has settled.mp3',
+      cover:'/assets/cover/The dust has settled.jpg'
     },
   ]);
         
@@ -313,50 +306,60 @@ const handleSongEnd = () => {
 }
 
 const changeSong = async (index) => {
-  if (isLoadingSong.value || index === currentSongIndex.value) return; // 避免重复操作
+  if (isLoadingSong.value || index === currentSongIndex.value) return;
 
-  isLoadingSong.value = true; // 加锁：禁止加载中操作
-  const needPlay = isPlaying.value; // 记录切换前的播放状态
+  isLoadingSong.value = true;
+  const needPlay = isPlaying.value;
 
+  // 1. 暂停当前播放
+  if (audioElement.value && isPlaying.value) {
+    audioElement.value.pause();
+    stopCoverRotate();
+  }
+
+  // 2. 更新歌曲索引（模板的 :src 绑定会自动更新 audio.src）
+  currentSongIndex.value = index;
+  currentTime.value = 0;
+  duration.value = 0;
+
+  // 3. 等待新音频加载 — 同时监听 loadedmetadata 和 error
+  await new Promise((resolve) => {
+    const el = audioElement.value;
+    if (!el) { resolve(); return; }
+
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      el.removeEventListener('loadedmetadata', onMeta);
+      el.removeEventListener('error', onErr);
+      resolve();
+    };
+    const onMeta = () => finish();
+    const onErr = () => { console.error('音频加载失败:', el.src); finish(); };
+    const timer = setTimeout(finish, 8000); // 超时兜底
+
+    el.addEventListener('loadedmetadata', onMeta, { once: true });
+    el.addEventListener('error', onErr, { once: true });
+    el.load();
+  });
+
+  // 4. 播放
   try {
-    // 1. 先暂停当前播放（避免load中断）
-    if (audioElement.value && isPlaying.value) {
-      audioElement.value.pause();
-      stopCoverRotate();
-    }
-
-    // 2. 更新歌曲索引
-    currentSongIndex.value = index;
-
-    // 3. 等待音频加载完成后再播放
-    if (audioElement.value) {
-      // 重置时间状态
-      currentTime.value = 0;
-      duration.value = 0;
-
-      // 加载新歌曲（等待loadedmetadata确保元数据加载完成）
-      audioElement.value.load();
-      await new Promise((resolve) => {
-        audioElement.value.addEventListener('loadedmetadata', resolve, { once: true });
-        // 兜底：超时10秒自动resolve，避免卡死
-        setTimeout(resolve, 10000);
-      });
-
-      // 4. 仅当切换前是播放状态，才重新播放
-      if (needPlay) {
-        await audioElement.value.play();
-        startCoverRotate();
-        isPlaying.value = true; // 确保状态同步
-      } else {
-        isPlaying.value = false;
-      }
+    if (needPlay) {
+      await audioElement.value.play();
+      startCoverRotate();
+      isPlaying.value = true;
+    } else {
+      isPlaying.value = false;
     }
   } catch (error) {
-    console.error('切换歌曲失败:', error);
+    console.error('播放失败:', error);
     isPlaying.value = false;
     stopCoverRotate();
   } finally {
-    isLoadingSong.value = false; // 解锁
+    isLoadingSong.value = false;
   }
 };
 
@@ -384,15 +387,6 @@ const playSong = (index) => {
     }
   });
 };
-
-// 监听歌曲切换（清理旧状态）
-watch(currentSong, (newSong) => {
-  if (audioElement.value) {
-    audioElement.value.src = newSong.src;
-    currentTime.value = 0;
-    duration.value = 0;
-  }
-});
 
 // 组件挂载后初始化
 onMounted(() => {

@@ -4,9 +4,28 @@ import {onMounted, ref} from "vue";
 
 const userStore = useUserStore()
 
-const currentTime = ref(new Date());
+const now = ref(new Date());
 const isTimerShowing = ref(false);
 const timerDuration = ref(120); // 120秒倒计时
+
+// ============ 北京时间格式化（UTC+8，不受用户本地时区影响） ============
+const fmtDate = new Intl.DateTimeFormat('zh-CN', {
+  timeZone: 'Asia/Shanghai',
+  month: '2-digit',
+  day: '2-digit'
+})
+
+const fmtTime = new Intl.DateTimeFormat('zh-CN', {
+  timeZone: 'Asia/Shanghai',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hour12: false
+})
+
+const beijingDate = ref(fmtDate.format(now.value))   // 09/02
+const beijingTime = ref(fmtTime.format(now.value))   // 14:30:05
+
 const desaturateEasterEgg = () => {
   if (document.body.classList.contains('desaturate')) return;
 
@@ -30,9 +49,11 @@ const desaturateEasterEgg = () => {
   }, 1000);
 }
 onMounted(() => {
-  // 更新时间显示
+  // 更新北京时间显示（每秒）
   setInterval(() => {
-    currentTime.value = new Date();
+    now.value = new Date();
+    beijingDate.value = fmtDate.format(now.value)
+    beijingTime.value = fmtTime.format(now.value)
   }, 1000);
 })
 </script>
@@ -49,9 +70,9 @@ onMounted(() => {
       <div class="access-granted">当前用户: <span id="currentUserName">{{ userStore.currentUser?.displayName || '未登录' }}</span></div>
     </div>
     <div class="system-time-container">
-      <div class="system-time" id="systemTime">始源历14200年1月{{ currentTime.getDate() }}日{{ currentTime.getHours().toString().padStart(2, '0') }}:{{ currentTime.getMinutes().toString().padStart(2, '0') }}:{{ currentTime.getSeconds().toString().padStart(2, '0') }}</div>
+      <div class="system-time" id="systemTime">系统时间（UTC+8）{{ beijingDate }} {{ beijingTime }}</div>
       <div class="heartbeat" @click="desaturateEasterEgg">最后心跳:
-        <span id="lastHeartbeat"> {{ currentTime.getHours().toString().padStart(2, '0') }}:{{ currentTime.getMinutes().toString().padStart(2, '0') }}:{{ currentTime.getSeconds().toString().padStart(2, '0') }}</span><span class="blink">_</span></div>
+        <span id="lastHeartbeat"> {{ beijingTime }}</span><span class="blink">_</span></div>
     </div>
   </div>
 </template>

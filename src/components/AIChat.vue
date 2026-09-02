@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed, watch, nextTick, onMounted } from 'vue'
+import GomokuGame from '@/components/games/GomokuGame.vue'
+import MinesweeperPVP from '@/components/games/MinesweeperPVP.vue'
 
 // ============ 常量 ============
 const STORAGE_KEYS = {
@@ -114,11 +116,24 @@ const showAddModel = ref(false)
 const tempProvider = ref(DEFAULT_PROVIDER.id)
 const tempApiUrl = ref('')
 const tempApiKey = ref('')
+const tempModelId = ref('')           // 模型 ID
+const tempDisplayName = ref('')       // 显示名称（非必填）
+const tempPersona = ref(DEFAULT_PERSONA)
 const newModelId = ref('')
+
+// 检测连接状态
+const isTesting = ref(false)
+const testResult = ref('')            // '' | 'success' | 'fail' | 'testing'
+const showApiKey = ref(false)          // API Key 显隐切换
+const newModelLabel = ref('')
 
 // UI 状态
 const errorMessage = ref('')
 const chatContainer = ref(null)
+
+// 游戏面板
+const showGameMenu = ref(false)     // + 按钮弹出的菜单
+const activeGame = ref(null)          // null=聊天模式, 'gomoku'=五子棋, 'minesweeper'=排雷
 
 // 当前选中的供应商对象
 const currentProvider = computed(() => findProvider(selectedProvider.value))
@@ -213,48 +228,126 @@ const openSetup = () => {
   tempProvider.value = selectedProvider.value
   tempApiUrl.value = apiUrl.value
   tempApiKey.value = apiKey.value
+  tempModelId.value = selectedModel.value
+  // 如果当前模型在自定义列表里，取它的 label 作为显示名称
+  const custom = customModels.value.find(m => m.id === selectedModel.value)
+  tempDisplayName.value = custom ? custom.label : ''
+  testResult.value = ''
+  errorMessage.value = ''
   showSetup.value = true
 }
 
-// 设置面板里切换供应商：URL 跟着变（除非是自定义，自定义保持用户输入）
+// 设置面板里切换供应商：URL + 模型 ID 跟着变
 const onSetupProviderChange = (newProviderId) => {
   tempProvider.value = newProviderId
   const p = findProvider(newProviderId)
-  // 如果不是自定义供应商，自动把 URL 替换成该供应商默认地址
+  // 自动填 URL（自定义除外）
   if (p.id !== 'custom') {
     tempApiUrl.value = p.defaultUrl
   }
+  // 自动填第一个预设模型 ID
+  if (p.presetModels.length > 0) {
+    tempModelId.value = p.presetModels[0].value
+    tempDisplayName.value = p.presetModels[0].label
+  } else {
+    tempModelId.value = ''
+    tempDisplayName.value = ''
+  }
+  testResult.value = ''
+}
+
+// 检测连接
+const testConnection = async () => {
+  const key = tempApiKey.value.trim()
+  const url = normalizeUrl(tempApiUrl.value)
+  const modelId = tempModelId.value.trim()
+
+  if (!key || !url || !modelId) {
+    testResult.value = 'fail'
+    errorMessage.value = '请先填写所有必填项'
+    return
+  }
+
+  isTesting.value = true
+  testResult.value = 'testing'
+  errorMessage.value = ''
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${key}`
+      },
+      body: JSON.stringify({
+        model: modelId,
+        messages: [{ role: 'user', content: 'Hi' }],
+        max_tokens: 5,
+        stream: false
+      })
+    })
+
+    if (response.ok) {
+      testResult.value = 'success'
+    } else {
+      const errText = await response.text()
+      errorMessage.value = response.status === 401
+        ? 'API Key 无效'
+        : `失败 (${response.status}): ${errText.slice(0, 60)}`
+      testResult.value = 'fail'
+    }
+  } catch (err) {
+    errorMessage.value = '网络错误：' + (err.message || '无法连接')
+    testResult.value = 'fail'
+  } finally {
+    isTesting.value = false
+  }
+}
+
+// URL 自动补全：如果用户只填了基础地址（如 https://xxx.com/v1），自动补上 /chat/completions
+const normalizeUrl = (url) => {
+  url = url.trim().replace(/\/+$/, '')  // 去尾部斜杠
+  if (!url) return ''
+  // 如果已经有 /chat/completions 就不补了
+  if (/\/chat\/completions$/.test(url)) return url
+  // 如果以 /v1 或 /v2 结尾，补 /chat/completions
+  if (/\/v\d+$/.test(url)) return url + '/chat/completions'
+  // 其他情况也补上（兼容各种写法）
+  return url + '/v1/chat/completions'
 }
 
 // 保存设置
 const saveSetup = () => {
   const key = tempApiKey.value.trim()
-  const url = tempApiUrl.value.trim()
+  const url = normalizeUrl(tempApiUrl.value)
   const providerId = tempProvider.value.trim()
+  const modelId = tempModelId.value.trim()
+  const displayName = tempDisplayName.value.trim()
 
-  if (!key) { errorMessage.value = '请填写 API Key'; return }
-  if (!url)  { errorMessage.value = '请填写 API 地址'; return }
+  if (!key)     { errorMessage.value = '请填写 API Key'; return }
+  if (!url)     { errorMessage.value = '请填写 API 地址'; return }
+  if (!modelId) { errorMessage.value = '请填写模型 ID'; return }
 
   apiKey.value = key
   apiUrl.value = url
   selectedProvider.value = providerId
+  selectedModel.value = modelId
 
   localStorage.setItem(STORAGE_KEYS.API_KEY, encode(key))
   localStorage.setItem(STORAGE_KEYS.API_URL, url)
   localStorage.setItem(STORAGE_KEYS.PROVIDER, providerId)
+  localStorage.setItem(STORAGE_KEYS.MODEL, modelId)
 
-  // 如果切换了供应商，模型也重置成该供应商第一个预设
-  const p = findProvider(providerId)
-  if (p.presetModels.length > 0) {
-    const oldVal = selectedModel.value
-    const stillValid = [
-      ...p.presetModels.map(m => m.value),
-      ...customModels.value.map(m => m.id)
-    ].includes(oldVal)
-    if (!stillValid) {
-      selectedModel.value = p.presetModels[0].value
-      localStorage.setItem(STORAGE_KEYS.MODEL, selectedModel.value)
-    }
+  // 如果填了显示名称且不等于模型 ID，加入自定义模型列表
+  if (displayName && displayName !== modelId) {
+    // 先删掉同 ID 的旧条目
+    customModels.value = customModels.value.filter(m => m.id !== modelId)
+    customModels.value.push({ id: modelId, label: displayName })
+    persistCustomModels()
+  } else if (!displayName) {
+    // 没填显示名称，如果之前有同名自定义条目就删掉（用模型 ID 本身做 label）
+    customModels.value = customModels.value.filter(m => m.id !== modelId)
+    persistCustomModels()
   }
 
   showSetup.value = false
@@ -285,12 +378,14 @@ const addCustomModel = () => {
     return
   }
 
-  customModels.value.push({ id, label: id })
+  const label = newModelLabel.value.trim() || id
+  customModels.value.push({ id, label })
   persistCustomModels()
   selectedModel.value = id
   localStorage.setItem(STORAGE_KEYS.MODEL, id)
   showAddModel.value = false
   newModelId.value = ''
+  newModelLabel.value = ''
   errorMessage.value = ''
 }
 
@@ -468,7 +563,17 @@ const openPersonaEdit = () => {
 
 const openAddModel = () => {
   newModelId.value = ''
+  newModelLabel.value = ''
   showAddModel.value = true
+}
+
+// ============ 游戏控制 ============
+const startGame = (game) => {
+  activeGame.value = game
+  showGameMenu.value = false
+}
+const exitGame = () => {
+  activeGame.value = null
 }
 </script>
 
@@ -549,8 +654,17 @@ const openAddModel = () => {
           <button class="add-model-btn" @click="openAddModel">+ 添加自定义模型</button>
         </div>
 
-        <!-- ====== 消息区域 ====== -->
+        <!-- ====== 消息区域 / 游戏区域 ====== -->
         <div ref="chatContainer" class="chat-messages">
+          <!-- 游戏模式 -->
+          <div v-if="activeGame === 'gomoku'" class="game-area">
+            <GomokuGame @exit="exitGame" />
+          </div>
+          <div v-else-if="activeGame === 'minesweeper'" class="game-area">
+            <MinesweeperPVP @exit="exitGame" />
+          </div>
+          <!-- 聊天模式 -->
+          <template v-else>
           <div v-if="messages.length === 0" class="chat-empty">
             <div class="empty-icon">✦</div>
             <div class="empty-text">开始一段与小烬的对话吧</div>
@@ -583,11 +697,35 @@ const openAddModel = () => {
           <div v-if="errorMessage" class="error-msg">
             ⚠ {{ errorMessage }}
           </div>
+          </template>
         </div>
 
         <!-- ====== 输入区域 ====== -->
         <div class="chat-input-area">
-          <div class="input-wrapper">
+          <div class="input-wrapper" v-show="!activeGame">
+            <!-- 更多选项（+ 按钮） -->
+            <div class="more-options-wrapper">
+              <button
+                class="more-btn"
+                :class="{ active: showGameMenu }"
+                @click="showGameMenu = !showGameMenu"
+                title="更多选项"
+              >+</button>
+              <Transition name="slide-up">
+                <div v-if="showGameMenu" class="more-menu">
+                  <div class="more-menu-item" @click="startGame('gomoku')">
+                    <span class="game-icon">⚫</span>
+                    <span>五子棋</span>
+                    <span class="game-desc">和小烬下棋</span>
+                  </div>
+                  <div class="more-menu-item" @click="startGame('minesweeper')">
+                    <span class="game-icon">💣</span>
+                    <span>排雷</span>
+                    <span class="game-desc">轮流点格，谁先踩雷谁输</span>
+                  </div>
+                </div>
+              </Transition>
+            </div>
             <textarea
               v-model="inputText"
               class="chat-input"
@@ -609,18 +747,15 @@ const openAddModel = () => {
         </div>
       </div>
 
-      <!-- ====== API / 供应商配置 模态框（重构后） ====== -->
+      <!-- ====== API / 供应商配置 模态框 ====== -->
       <Transition name="modal">
         <div v-if="showSetup" class="modal-overlay" @click.self="showSetup = false">
           <div class="modal-panel setup-panel" @click.stop>
             <div class="modal-title">🔧 AI 服务配置</div>
-            <div class="modal-desc">
-              选择一个预设供应商，或自定义 API 地址、Key 与模型。密钥将经过 Base64 编码后安全存储在本地浏览器中。
-            </div>
 
-            <!-- 供应商选择 -->
+            <!-- 1. 服务商 -->
             <div class="form-row">
-              <label class="form-label">服务供应商</label>
+              <label class="form-label">服务商</label>
               <select
                 class="modal-input"
                 :value="tempProvider"
@@ -632,41 +767,85 @@ const openAddModel = () => {
               </select>
             </div>
 
-            <!-- API 地址 -->
+            <!-- 2. API Key -->
             <div class="form-row">
-              <label class="form-label">API 地址
-                <span v-if="tempProviderObj.defaultUrl" class="form-hint">（预设: {{ tempProviderObj.defaultUrl }}）</span>
-              </label>
+              <label class="form-label">API Key</label>
+              <div class="key-input-wrapper">
+                <input
+                  v-model="tempApiKey"
+                  type="text"
+                  class="modal-input key-input"
+                  :class="{ 'key-visible': showApiKey }"
+                  placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                  autocomplete="off"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                />
+                <button class="key-toggle" type="button" @click="showApiKey = !showApiKey" tabindex="-1">
+                  {{ showApiKey ? '🙈' : '👁' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. API 地址 -->
+            <div class="form-row">
+              <label class="form-label">API 地址</label>
               <input
                 v-model="tempApiUrl"
                 type="text"
                 class="modal-input"
-                :placeholder="tempProviderObj.defaultUrl || 'https://your-api.com/v1/chat/completions'"
+                :placeholder="tempProviderObj.defaultUrl || 'https://your-api.com/v1'"
+              />
+              <div class="form-tip">可省略写：<code>https://xxx.com/v1</code>，系统自动补全 <code>/chat/completions</code></div>
+            </div>
+
+            <!-- 4. 模型 ID -->
+            <div class="form-row">
+              <label class="form-label">模型 ID</label>
+              <input
+                v-model="tempModelId"
+                type="text"
+                class="modal-input"
+                :placeholder="tempProviderObj.modelPlaceholder || '例如 gpt-4o'"
+                list="preset-models-list"
+              />
+              <datalist id="preset-models-list">
+                <option v-for="m in tempProviderObj.presetModels" :key="m.value" :value="m.value">{{ m.label }}</option>
+              </datalist>
+            </div>
+
+            <!-- 5. 显示名称（非必填） -->
+            <div class="form-row">
+              <label class="form-label">显示名称 <span class="form-optional">（非必填）</span></label>
+              <input
+                v-model="tempDisplayName"
+                type="text"
+                class="modal-input"
+                placeholder="给这个模型起个名字，方便辨认"
               />
             </div>
 
-            <!-- API Key -->
-            <div class="form-row">
-              <label class="form-label">API Key</label>
-              <input
-                v-model="tempApiKey"
-                type="password"
-                class="modal-input"
-                placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                @keydown.enter="saveSetup"
-              />
-            </div>
+            <!-- 检测结果 -->
+            <div v-if="testResult === 'success'" class="test-result success">✓ 连接成功，配置可用！</div>
+            <div v-if="testResult === 'fail'" class="test-result fail">✗ 连接失败，请检查配置</div>
 
             <!-- 错误提示 -->
             <div v-if="errorMessage" class="modal-inline-error">⚠ {{ errorMessage }}</div>
 
+            <!-- 6. 按钮行 -->
             <div class="modal-actions">
+              <button
+                class="modal-btn test-btn"
+                :disabled="isTesting || !tempApiKey.trim() || !tempApiUrl.trim() || !tempModelId.trim()"
+                @click="testConnection"
+              >{{ isTesting ? '检测中...' : '检测' }}</button>
               <button class="modal-btn secondary" @click="showSetup = false">取消</button>
               <button
                 class="modal-btn primary"
-                :disabled="!tempApiKey.trim() || !tempApiUrl.trim()"
+                :disabled="!tempApiKey.trim() || !tempApiUrl.trim() || !tempModelId.trim()"
                 @click="saveSetup"
-              >保存</button>
+              >确定</button>
             </div>
           </div>
         </div>
@@ -703,15 +882,29 @@ const openAddModel = () => {
           <div class="modal-panel" @click.stop>
             <div class="modal-title">➕ 添加自定义模型</div>
             <div class="modal-desc">
-              请输入完整的模型 ID，例如：<code>{{ currentProvider.modelPlaceholder }}</code>
+              输入完整的模型 ID（必填）和显示名称（选填，方便辨认）。
             </div>
-            <input
-              v-model="newModelId"
-              type="text"
-              class="modal-input"
-              :placeholder="currentProvider.modelPlaceholder"
-              @keydown.enter="addCustomModel"
-            />
+            <div class="form-row">
+              <label class="form-label">模型 ID <span class="form-hint">（必填）</span></label>
+              <input
+                v-model="newModelId"
+                type="text"
+                class="modal-input"
+                :placeholder="currentProvider.modelPlaceholder"
+                @keydown.enter="addCustomModel"
+              />
+            </div>
+            <div class="form-row">
+              <label class="form-label">显示名称 <span class="form-hint">（选填，不填则用 ID）</span></label>
+              <input
+                v-model="newModelLabel"
+                type="text"
+                class="modal-input"
+                placeholder="例如：我的自定义模型"
+                @keydown.enter="addCustomModel"
+              />
+            </div>
+            <div v-if="errorMessage" class="modal-inline-error">⚠ {{ errorMessage }}</div>
             <div class="modal-actions">
               <button class="modal-btn secondary" @click="showAddModel = false">取消</button>
               <button
@@ -1227,6 +1420,96 @@ const openAddModel = () => {
   font-style: italic;
 }
 
+.form-tip {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  color: rgba(0, 255, 255, 0.3);
+}
+.form-tip code {
+  background: rgba(0, 255, 255, 0.06);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.68rem;
+}
+
+.form-optional {
+  color: rgba(0, 255, 255, 0.3);
+  font-size: 0.72rem;
+  font-weight: normal;
+}
+
+/* 检测结果 */
+.test-result {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.test-result.success {
+  background: rgba(0, 255, 100, 0.08);
+  border: 1px solid rgba(0, 255, 100, 0.25);
+  color: #66ff99;
+}
+.test-result.fail {
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.25);
+  color: #ff8888;
+}
+
+/* 检测按钮 */
+.modal-btn.test-btn {
+  border: 1px solid rgba(0, 200, 100, 0.4);
+  color: #66cc99;
+  margin-right: auto;
+}
+.modal-btn.test-btn:hover {
+  background: rgba(0, 200, 100, 0.08);
+  border-color: #66cc99;
+}
+.modal-btn.test-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* API Key 输入框 — 用 type="text" + CSS 遮蔽，避免移动端安全键盘 */
+.key-input-wrapper {
+  position: relative;
+}
+
+.key-input {
+  -webkit-text-security: disc;  /* iOS Safari / Chrome Android 字符遮蔽 */
+  padding-right: 44px;          /* 给切换按钮留位置 */
+}
+/* Firefox 不支持 -webkit-text-security，用 letter-spacing + color 弱化 */
+@supports not (-webkit-text-security: disc) {
+  .key-input {
+    letter-spacing: 2px;
+  }
+}
+
+.key-input.key-visible {
+  -webkit-text-security: none;
+  letter-spacing: normal;
+}
+
+.key-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.key-toggle:hover {
+  opacity: 1;
+}
+
 .modal-input {
   width: 100%;
   padding: 9px 12px;
@@ -1347,5 +1630,97 @@ const openAddModel = () => {
 }
 .chat-messages::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 255, 255, 0.35);
+}
+
+/* ==================== 游戏区域 ==================== */
+.game-area {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 8px 0;
+}
+
+/* ==================== 更多选项（+ 按钮） ==================== */
+.more-options-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.more-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  color: rgba(0, 255, 255, 0.5);
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.more-btn:hover, .more-btn.active {
+  background: rgba(0, 255, 255, 0.08);
+  border-color: #00ffff;
+  color: #00ffff;
+}
+
+.more-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 8px;
+  background: rgba(12, 12, 30, 0.98);
+  border: 1px solid rgba(0, 255, 255, 0.25);
+  border-radius: 8px;
+  padding: 6px;
+  min-width: 220px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  z-index: 50;
+}
+
+.more-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #ccdddd;
+  font-size: 0.85rem;
+}
+
+.more-menu-item:hover {
+  background: rgba(0, 255, 255, 0.08);
+  color: #00ffff;
+}
+
+.game-icon {
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+}
+
+.game-desc {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: rgba(0, 255, 255, 0.35);
+  white-space: nowrap;
+}
+
+/* + 按钮菜单弹出动画 */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.2s ease;
+}
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
 }
 </style>
