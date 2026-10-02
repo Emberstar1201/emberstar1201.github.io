@@ -290,10 +290,10 @@ onUnmounted(() => {})
 .board {
   display: inline-grid;
   grid-template-columns: repeat(15, 30px);
-  background: rgba(0, 170, 200, 0.15);
-  border: 2px solid rgba(0, 255, 255, 0.3);
+  background: rgba(15, 15, 30, 0.6);
+  border: 1px solid rgba(0, 255, 255, 0.3);
   border-radius: 4px;
-  padding: 3px;
+  padding: 15px;
   gap: 0;
 }
 
@@ -310,12 +310,13 @@ onUnmounted(() => {})
   cursor: pointer;
   position: relative;
   transition: background 0.15s;
-  border: 1px solid rgba(0, 255, 255, 0.18);
-  background: rgba(15, 15, 30, 0.6);
+  background:
+    linear-gradient(to right, transparent calc(50% - 0.5px), rgba(0, 255, 255, 0.28) calc(50% - 0.5px), rgba(0, 255, 255, 0.28) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    linear-gradient(to bottom, transparent calc(50% - 0.5px), rgba(0, 255, 255, 0.28) calc(50% - 0.5px), rgba(0, 255, 255, 0.28) calc(50% + 0.5px), transparent calc(50% + 0.5px));
 }
 
 .cell-item:not(.disabled):hover {
-  background: rgba(0, 255, 255, 0.08);
+  background-color: rgba(0, 255, 255, 0.08);
 }
 
 .cell-item.disabled {
@@ -325,7 +326,8 @@ onUnmounted(() => {})
 .cell-item.last-move::after {
   content: '';
   position: absolute;
-  inset: 2px;
+  width: 22px;
+  height: 22px;
   border: 1.5px solid rgba(0, 255, 0, 0.6);
   border-radius: 50%;
   pointer-events: none;
