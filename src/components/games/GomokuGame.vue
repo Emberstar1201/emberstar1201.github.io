@@ -9,6 +9,8 @@ const winner = ref(0)        // 0=进行中 1=玩家胜 2=小烬胜 3=平局
 const aiThinking = ref(false)
 const lastMove = ref(null)   // {r, c}
 const moveCount = ref(0)
+const mercyRequested = ref(false)
+const cheating = ref(false)
 
 // 初始化棋盘
 const initBoard = () => {
@@ -19,6 +21,8 @@ const initBoard = () => {
   aiThinking.value = false
   lastMove.value = null
   moveCount.value = 0
+  mercyRequested.value = false
+  cheating.value = false
 }
 initBoard()
 
@@ -28,7 +32,7 @@ const statusText = computed(() => {
     if (winner.value === 2) return '🤖 小烬赢了！'
     return '🤝 平局'
   }
-  if (aiThinking.value) return '小烬思考中...'
+  if (aiThinking.value) return cheating.value ? '小烬正在作弊...' : '小烬思考中...'
   if (currentPlayer.value === 1) return '轮到你了（黑棋）'
   return '轮到小烬（白棋）'
 })
@@ -118,10 +122,15 @@ const scorePosition = (r, c, player) => {
 const aiMove = () => {
   if (gameOver.value) return
   aiThinking.value = true
+  cheating.value = Math.random() < 0.25
 
   setTimeout(() => {
+    const shouldCheat = cheating.value
+    const requestedMercy = mercyRequested.value
+    mercyRequested.value = false
     let bestScore = -1
     let bestMoves = []
+    const candidateMoves = []
 
     for (let r = 0; r < SIZE; r++) {
       for (let c = 0; c < SIZE; c++) {
@@ -139,6 +148,7 @@ const aiMove = () => {
         if (!hasNeighbor && moveCount.value > 0) continue
 
         const score = scorePosition(r, c, 2)
+        candidateMoves.push({ r, c, score })
         if (score > bestScore) {
           bestScore = score
           bestMoves = [{ r, c }]
@@ -153,7 +163,17 @@ const aiMove = () => {
       bestMoves = [{ r: 7, c: 7 }]
     }
 
-    const move = bestMoves[Math.floor(Math.random() * bestMoves.length)]
+    // 放水时从较弱候选中选择，作弊时仍坚持最强落点
+    let move
+    if (requestedMercy && !shouldCheat && candidateMoves.length > 0) {
+      const weakerMoves = [...candidateMoves]
+        .sort((a, b) => a.score - b.score)
+        .slice(0, Math.max(1, Math.ceil(candidateMoves.length / 2)))
+      move = weakerMoves[Math.floor(Math.random() * weakerMoves.length)]
+    } else {
+      move = bestMoves[Math.floor(Math.random() * bestMoves.length)]
+    }
+
     if (move) {
       board.value[move.r][move.c] = 2
       lastMove.value = { r: move.r, c: move.c }
@@ -165,12 +185,34 @@ const aiMove = () => {
       } else if (moveCount.value >= SIZE * SIZE) {
         gameOver.value = true
         winner.value = 3
+      } else if (shouldCheat) {
+        const extraMoves = candidateMoves.filter(({ r, c }) => r !== move.r || c !== move.c)
+        const extraMove = extraMoves.sort((a, b) => b.score - a.score)[0]
+        if (extraMove) {
+          board.value[extraMove.r][extraMove.c] = 2
+          lastMove.value = { r: extraMove.r, c: extraMove.c }
+          moveCount.value++
+          if (checkWin(extraMove.r, extraMove.c, 2)) {
+            gameOver.value = true
+            winner.value = 2
+          } else if (moveCount.value >= SIZE * SIZE) {
+            gameOver.value = true
+            winner.value = 3
+          }
+        }
+        if (!gameOver.value) currentPlayer.value = 1
       } else {
         currentPlayer.value = 1
       }
     }
+    cheating.value = false
     aiThinking.value = false
   }, 500)
+}
+
+const requestMercy = () => {
+  if (gameOver.value || aiThinking.value || currentPlayer.value !== 1 || mercyRequested.value) return
+  mercyRequested.value = true
 }
 
 // 玩家落子
@@ -205,6 +247,11 @@ onUnmounted(() => {})
   <div class="gomoku-game">
     <div class="game-header">
       <span class="game-status">{{ statusText }}</span>
+      <button
+        class="game-btn mercy"
+        :disabled="gameOver || aiThinking || currentPlayer !== 1 || mercyRequested"
+        @click="requestMercy"
+      >{{ mercyRequested ? '已请求放水' : '请求小烬放水' }}</button>
       <button class="game-btn restart" @click="initBoard">重新开始</button>
       <button class="game-btn exit" @click="emit('exit')">退出游戏</button>
     </div>
@@ -270,9 +317,17 @@ onUnmounted(() => {})
   transition: all 0.2s;
   font-family: inherit;
 }
-.game-btn:hover {
+.game-btn:hover:not(:disabled) {
   background: rgba(0, 255, 255, 0.1);
   border-color: #00ffff;
+}
+.game-btn:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.game-btn.mercy {
+  border-color: rgba(255, 210, 80, 0.45);
+  color: #ffe080;
 }
 .game-btn.exit {
   border-color: rgba(255, 80, 80, 0.4);
