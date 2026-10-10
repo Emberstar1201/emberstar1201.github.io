@@ -2,6 +2,7 @@
 import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import GomokuGame from '@/components/games/GomokuGame.vue'
 import MinesweeperPVP from '@/components/games/MinesweeperPVP.vue'
+import OldMaidGame from '@/components/games/OldMaidGame.vue'
 
 // ============ 常量 ============
 const STORAGE_KEYS = {
@@ -663,6 +664,9 @@ const exitGame = () => {
           <div v-else-if="activeGame === 'minesweeper'" class="game-area">
             <MinesweeperPVP @exit="exitGame" />
           </div>
+          <div v-else-if="activeGame === 'oldmaid'" class="game-area">
+            <OldMaidGame @exit="exitGame" />
+          </div>
           <!-- 聊天模式 -->
           <template v-else>
           <div v-if="messages.length === 0" class="chat-empty">
@@ -722,6 +726,11 @@ const exitGame = () => {
                     <span class="game-icon">💣</span>
                     <span>排雷</span>
                     <span class="game-desc">轮流点格，谁先踩雷谁输</span>
+                  </div>
+                  <div class="more-menu-item" @click="startGame('oldmaid')">
+                    <span class="game-icon">🃏</span>
+                    <span>抽鬼牌</span>
+                    <span class="game-desc">抽牌配对，别留下鬼牌</span>
                   </div>
                 </div>
               </Transition>
