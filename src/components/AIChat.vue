@@ -3,6 +3,7 @@ import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import GomokuGame from '@/components/games/GomokuGame.vue'
 import MinesweeperPVP from '@/components/games/MinesweeperPVP.vue'
 import OldMaidGame from '@/components/games/OldMaidGame.vue'
+import PokerGame from '@/components/games/PokerGame.vue'
 
 // ============ 常量 ============
 const STORAGE_KEYS = {
@@ -134,7 +135,7 @@ const chatContainer = ref(null)
 
 // 游戏面板
 const showGameMenu = ref(false)     // + 按钮弹出的菜单
-const activeGame = ref(null)          // null=聊天模式, 'gomoku'=五子棋, 'minesweeper'=排雷
+const activeGame = ref(null)          // null=聊天模式, gomoku=五子棋, minesweeper=排雷, oldmaid=抽鬼牌, poker=扑克
 
 // 当前选中的供应商对象
 const currentProvider = computed(() => findProvider(selectedProvider.value))
@@ -667,6 +668,9 @@ const exitGame = () => {
           <div v-else-if="activeGame === 'oldmaid'" class="game-area">
             <OldMaidGame @exit="exitGame" />
           </div>
+          <div v-else-if="activeGame === 'poker'" class="game-area">
+            <PokerGame @exit="exitGame" />
+          </div>
           <!-- 聊天模式 -->
           <template v-else>
           <div v-if="messages.length === 0" class="chat-empty">
@@ -731,6 +735,11 @@ const exitGame = () => {
                     <span class="game-icon">🃏</span>
                     <span>抽鬼牌</span>
                     <span class="game-desc">抽牌配对，别留下鬼牌</span>
+                  </div>
+                  <div class="more-menu-item" @click="startGame('poker')">
+                    <span class="game-icon">♠</span>
+                    <span>打扑克</span>
+                    <span class="game-desc">54张牌，双方各27张</span>
                   </div>
                 </div>
               </Transition>

@@ -12,6 +12,7 @@ const gameOver = ref(false)
 const winner = ref(0)        // 0=进行中 1=玩家胜 2=小烬胜
 const loser = ref(0)         // 谁踩到雷
 const aiThinking = ref(false)
+const cheating = ref(false)
 const explodeCell = ref(null) // 踩雷的格子
 const moveCount = ref(0)
 
@@ -56,6 +57,7 @@ const initBoard = () => {
   winner.value = 0
   loser.value = 0
   aiThinking.value = false
+  cheating.value = false
   explodeCell.value = null
   moveCount.value = 0
 }
@@ -69,7 +71,7 @@ const statusText = computed(() => {
     if (winner.value === 2) return '💥 你踩到雷了，小烬赢了！'
     return ''
   }
-  if (aiThinking.value) return '小烬选择中...'
+  if (aiThinking.value) return cheating.value ? '小烬正在作弊，避开了地雷...' : '小烬选择中...'
   if (currentPlayer.value === 1) return '轮到你点击（小心雷！）'
   return '轮到小烬'
 })
@@ -147,6 +149,7 @@ const handleClick = (r, c) => {
 const aiTurn = () => {
   if (gameOver.value) return
   aiThinking.value = true
+  cheating.value = Math.random() < 0.25
 
   setTimeout(() => {
     // 收集未翻开的格子
@@ -159,8 +162,11 @@ const aiTurn = () => {
       }
     }
 
+    const shouldCheat = cheating.value
+
     if (candidates.length === 0) {
       aiThinking.value = false
+      cheating.value = false
       return
     }
 
@@ -182,7 +188,10 @@ const aiTurn = () => {
       return false
     })
 
-    if (safeCands.length > 0) {
+    if (shouldCheat) {
+      const cheatSafeCands = candidates.filter(({ r, c }) => board.value[r][c] !== -1)
+      pick = (cheatSafeCands.length > 0 ? cheatSafeCands : candidates)[Math.floor(Math.random() * (cheatSafeCands.length > 0 ? cheatSafeCands.length : candidates.length))]
+    } else if (safeCands.length > 0) {
       pick = safeCands[Math.floor(Math.random() * safeCands.length)]
     } else {
       pick = candidates[Math.floor(Math.random() * candidates.length)]
@@ -202,6 +211,7 @@ const aiTurn = () => {
         }
       }
       aiThinking.value = false
+      cheating.value = false
       return
     }
 
@@ -209,11 +219,13 @@ const aiTurn = () => {
       gameOver.value = true
       winner.value = 2
       aiThinking.value = false
+      cheating.value = false
       return
     }
 
     currentPlayer.value = 1
     aiThinking.value = false
+    cheating.value = false
   }, 600)
 }
 

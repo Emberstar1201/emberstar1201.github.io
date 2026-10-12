@@ -185,22 +185,6 @@ const aiMove = () => {
       } else if (moveCount.value >= SIZE * SIZE) {
         gameOver.value = true
         winner.value = 3
-      } else if (shouldCheat) {
-        const extraMoves = candidateMoves.filter(({ r, c }) => r !== move.r || c !== move.c)
-        const extraMove = extraMoves.sort((a, b) => b.score - a.score)[0]
-        if (extraMove) {
-          board.value[extraMove.r][extraMove.c] = 2
-          lastMove.value = { r: extraMove.r, c: extraMove.c }
-          moveCount.value++
-          if (checkWin(extraMove.r, extraMove.c, 2)) {
-            gameOver.value = true
-            winner.value = 2
-          } else if (moveCount.value >= SIZE * SIZE) {
-            gameOver.value = true
-            winner.value = 3
-          }
-        }
-        if (!gameOver.value) currentPlayer.value = 1
       } else {
         currentPlayer.value = 1
       }

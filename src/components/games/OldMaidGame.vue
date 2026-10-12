@@ -15,10 +15,11 @@ const gameOver = ref(false)
 const winner = ref(0)
 const message = ref('')
 const aiThinking = ref(false)
+const cheating = ref(false)
 
 const statusText = computed(() => {
   if (gameOver.value) return winner.value === 1 ? '你赢了，小烬拿到了鬼牌' : '小烬赢了，你拿到了鬼牌'
-  if (aiThinking.value) return '小烬正在抽牌...'
+  if (aiThinking.value) return cheating.value ? '小烬正在作弊，偷偷看牌...' : '小烬正在抽牌...'
   if (message.value) return message.value
   return currentPlayer.value === 1 ? '轮到你：抽小烬的一张牌' : '小烬的回合'
 })
@@ -62,6 +63,7 @@ const initGame = () => {
   winner.value = 0
   message.value = ''
   aiThinking.value = false
+  cheating.value = false
   finishIfNeeded()
 }
 
@@ -81,13 +83,21 @@ const drawForPlayer = (index) => {
 const aiTurn = () => {
   if (gameOver.value) return
   aiThinking.value = true
+  cheating.value = Math.random() < 0.25
   window.setTimeout(() => {
+    const shouldCheat = cheating.value
     if (playerHand.value.length === 0) {
       aiThinking.value = false
+      cheating.value = false
       finishIfNeeded()
       return
     }
-    const index = Math.floor(Math.random() * playerHand.value.length)
+    const matchingIndices = playerHand.value
+      .map((card, index) => ({ card, index }))
+      .filter(({ card }) => !card.joker && aiHand.value.some((item) => item.pair === card.pair))
+      .map(({ index }) => index)
+    const pickPool = shouldCheat && matchingIndices.length > 0 ? matchingIndices : playerHand.value.map((_, index) => index)
+    const index = pickPool[Math.floor(Math.random() * pickPool.length)]
     const [card] = playerHand.value.splice(index, 1)
     const hadPair = !card.joker && aiHand.value.some((item) => item.pair === card.pair)
     aiHand.value.push(card)
@@ -95,6 +105,7 @@ const aiTurn = () => {
     message.value = card.joker ? '小烬抽到了鬼牌！' : hadPair ? '小烬抽到一张牌并弃掉了对子' : '小烬抽到一张牌'
     finishIfNeeded()
     aiThinking.value = false
+    cheating.value = false
     if (!gameOver.value) currentPlayer.value = 1
   }, 650)
 }
